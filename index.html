@@ -47,23 +47,6 @@
         .top-bar { display: flex; justify-content: space-between; align-items: center; }
         .header-left { display: flex; align-items: center; gap: 12px; }
         
-        .edit-budget-btn { 
-            background: var(--card-bg); 
-            border: 1px solid var(--border-color); 
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.1rem; 
-            cursor: pointer; 
-            color: var(--text-color); 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-            transition: transform 0.1s, background-color 0.2s;
-        }
-        .edit-budget-btn:active { transform: scale(0.9); background-color: var(--border-color); }
-        
         .savings-badge { background-color: var(--card-bg); padding: 8px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
         
         .hero-card { background-color: var(--card-bg); border-radius: var(--border-radius); padding: 25px 20px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid var(--border-color); transition: color 0.3s; }
@@ -73,6 +56,10 @@
         .hero-sub { display: flex; justify-content: space-around; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-muted); }
         .hero-sub div span { display: block; font-weight: bold; font-size: 1.1rem; margin-top: 3px; color: var(--text-color); }
         
+        .clickable-budget { padding: 5px 10px; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; border: 1px dashed transparent; }
+        .clickable-budget:active { background-color: var(--bg-color); border-color: var(--border-color); }
+        .clickable-budget:hover { background-color: var(--bg-color); }
+
         .input-section { background-color: var(--card-bg); border-radius: var(--border-radius); padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
         .amount-input-wrapper { position: relative; margin-bottom: 15px; }
         .amount-input { width: 100%; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; font-size: 1.5rem; font-weight: bold; color: var(--text-color); text-align: center; box-sizing: border-box; outline: none; }
@@ -98,6 +85,7 @@
         
         .btn { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         .btn-outline { width: 100%; background-color: transparent; color: var(--text-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        .btn-secondary { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); }
     </style>
 </head>
 <body>
@@ -105,8 +93,7 @@
     <div class="top-bar">
         <div class="header-left">
             <h2 style="margin:0; font-size: 1.3rem;">Rozpočet</h2>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">v2.0</span>
-            <button class="edit-budget-btn" onclick="openEditIncomeModal()" aria-label="Upravit rozpočet">✏️</button>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">v2.1</span>
         </div>
         <div class="savings-badge">
             Úspory: <span id="totalSavingsDisplay">0</span> Kč
@@ -119,8 +106,8 @@
         <div class="hero-amount" id="dailyLimitDisplay">0 Kč</div>
         
         <div class="hero-sub">
-            <div>
-                Zůstává na měsíc
+            <div class="clickable-budget" onclick="openEditIncomeModal()" title="Kliknutím upravíš rozpočet">
+                Zůstává na měsíc ✏️
                 <span id="remainingMonthDisplay">0 Kč</span>
             </div>
             <div>
@@ -154,6 +141,11 @@
         <div class="hero-label" style="margin-bottom: 15px; text-align: left;">Historie výdajů</div>
         <ul class="expense-list" id="expenseList"></ul>
     </div>
+
+    <!-- Nové masivní tlačítko úplně dole -->
+    <button class="btn btn-secondary" style="margin-bottom: 20px;" onclick="openEditIncomeModal()">
+        ⚙️ Nastavení měsíčního rozpočtu
+    </button>
 
     <!-- Modál pro Nový měsíc -->
     <div class="modal-overlay" id="incomeModal">
@@ -200,8 +192,7 @@
             </div>
         </div>
     </div>
-
-    <script>
+        <script>
         let pendingUnspent = 0;
         let budgetData = JSON.parse(localStorage.getItem('myBudgetApp'));
 
@@ -357,4 +348,122 @@
                 `;
                 listEl.appendChild(li);
             });
-     
+        }
+
+        function saveIncome() {
+            const val = parseFloat(document.getElementById('incomeInput').value);
+            if (val > 0) {
+                budgetData.income = val;
+                budgetData.lastCheckedDate = getTodayStr();
+                budgetData.allocatedDailyLimit = val / getDaysLeftInMonth();
+                
+                saveData();
+                document.getElementById('incomeModal').style.display = 'none';
+                updateUI();
+            }
+        }
+
+        function openEditIncomeModal() {
+            try {
+                document.getElementById('editIncomeInput').value = budgetData.income || '';
+                document.getElementById('editIncomeModal').style.display = 'flex';
+                setTimeout(() => document.getElementById('editIncomeInput').focus(), 100);
+            } catch(e) {
+                console.error("Chyba při otevírání editace:", e);
+            }
+        }
+
+        function closeEditIncomeModal() {
+            document.getElementById('editIncomeModal').style.display = 'none';
+        }
+
+        function saveEditedIncome() {
+            const val = parseFloat(document.getElementById('editIncomeInput').value);
+            if (!isNaN(val) && val >= 0) {
+                budgetData.income = val;
+                
+                const totalEx = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
+                const newAvailable = budgetData.income - totalEx - budgetData.savedThisMonth;
+                const daysLeft = getDaysLeftInMonth();
+                
+                budgetData.allocatedDailyLimit = newAvailable / daysLeft;
+                budgetData.lastCheckedDate = getTodayStr(); 
+                
+                saveData();
+                closeEditIncomeModal();
+                updateUI();
+            }
+        }
+
+        function addQuickExpense(description) {
+            const amountInput = document.getElementById('quickAmount');
+            const amount = parseFloat(amountInput.value);
+            
+            if (!amount || amount <= 0) {
+                amountInput.style.borderColor = 'var(--danger)';
+                setTimeout(() => amountInput.style.borderColor = 'var(--border-color)', 500);
+                return;
+            }
+
+            budgetData.expenses.push({
+                id: Date.now(),
+                desc: description,
+                amount: amount,
+                date: getTodayStr()
+            });
+
+            amountInput.value = '';
+            saveData();
+            updateUI();
+        }
+
+        function deleteExpense(id) {
+            if(confirm('Smazat tento výdaj?')) {
+                budgetData.expenses = budgetData.expenses.filter(item => item.id !== id);
+                saveData();
+                updateUI();
+            }
+        }
+
+        function openCustomModal() {
+            const amount = document.getElementById('quickAmount').value;
+            if(!amount) {
+                alert("Nejdřív napiš částku nahoře!");
+                return;
+            }
+            
+            document.getElementById('customDate').value = getTodayStr();
+            document.getElementById('customDesc').value = '';
+            document.getElementById('customModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('customDesc').focus(), 100);
+        }
+
+        function closeCustomModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
+
+        function saveCustomExpense() {
+            const amount = parseFloat(document.getElementById('quickAmount').value);
+            const desc = document.getElementById('customDesc').value.trim() || 'Různé';
+            const dateVal = document.getElementById('customDate').value || getTodayStr();
+
+            budgetData.expenses.push({
+                id: Date.now(),
+                desc: desc,
+                amount: amount,
+                date: dateVal
+            });
+
+            document.getElementById('quickAmount').value = '';
+            closeCustomModal();
+            saveData();
+            updateUI();
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
+
+    
+    
