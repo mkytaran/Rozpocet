@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#1e293b">
+    <meta name="theme-color" content="#f8fafc" id="meta-theme-color">
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIlJvenBvXHUwMTBkZXQiLCAic2hvcnRfbmFtZSI6ICJSb3pwb1x1MDEwZGV0IiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJzdGFydF91cmwiOiAiLi8iLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjMWUyOTNiIiwgInRoZW1lX2NvbG9yIjogIiMxMGI5ODEiLCAiaWNvbnMiOiBbeyJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2NoYXJzZXQ9dXRmLTgsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnJTNFJTNDY2lyY2xlIGN4PSc1MCcgY3k9JzUwJyByPSc1MCcgZmlsbD0nJTIzMTBkNTc3Jy8lM0UlM0N0ZXh0IHg9JzUwJyB5PSc2OCcgZm9udC1zaXplPSc0NScgdGV4dC1hbmNob3I9J21pZGRsZSclM0VcdWQ4M2RcdWRjNWIlM0MvdGV4dCUzRSUzQy9zdmclM0UiLCAic2l6ZXMiOiAiMTkyeDE5MiA1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSJ9XX0=">
-    <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2310d577'/%3E%3Ctext x='50' y='68' font-size='45' text-anchor='middle'%3E👛%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2310d577'/%3E%3Ctext x='50' y='68' font-size='45' text-anchor='middle'%3E👛%3C/text%3E%3C/svg%3E">
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIlJvenBvXHUwMTBkZXQiLCAic2hvcnRfbmFtZSI6ICJSb3pwb1x1MDEwZGV0IiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJzdGFydF91cmwiOiAiLi8/dj0zIiwgImJhY2tncm91bmRfY29sb3IiOiAiI2Y4ZmFmYyIsICJ0aGVtZV9jb2xvciI6ICIjMTBiOTgxIiwgImljb25zIjogW3sic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtjaGFyc2V0PXV0Zi04LCUzQ3N2ZyUyMHhtbG5zJTNEJTI3aHR0cCUzQS8vd3d3LnczLm9yZy8yMDAwL3N2ZyUyNyUyMHZpZXdCb3glM0QlMjcwJTIwMCUyMDEwMCUyMDEwMCUyNyUzRSUwQSUyMCUyMCUzQ2NpcmNsZSUyMGN4JTNEJTI3NTAlMjclMjBjeSUzRCUyNzUwJTI3JTIwciUzRCUyNzUwJTI3JTIwZmlsbCUzRCUyNyUyMzVjM2EyMSUyNy8lM0UlMEElMjAlMjAlM0NyZWN0JTIweCUzRCUyNzI1JTI3JTIweSUzRCUyNzM1JTI3JTIwd2lkdGglM0QlMjc1MCUyNyUyMGhlaWdodCUzRCUyNzMwJTI3JTIwcnglM0QlMjc1JTI3JTIwZmlsbCUzRCUyNyUyM2ZmZmZmZiUyNyUyMG9wYWNpdHklM0QlMjcwLjklMjcvJTNFJTBBJTIwJTIwJTNDcGF0aCUyMGQlM0QlMjdNNzUlMjA0NXYxMEg2MHYtMTBoMTV6JTI3JTIwZmlsbCUzRCUyNyUyMzVjM2EyMSUyNy8lM0UlMEElMjAlMjAlM0NjaXJjbGUlMjBjeCUzRCUyNzY3LjUlMjclMjBjeSUzRCUyNzUwJTI3JTIwciUzRCUyNzIuNSUyNyUyMGZpbGwlM0QlMjclMjNmZmZmZmYlMjcvJTNFJTBBJTNDL3N2ZyUzRSIsICJzaXplcyI6ICIxOTJ4MTkyIDUxMng1MTIiLCAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIn1dfQ==">
+    <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20100%20100%27%3E%0A%20%20%3Ccircle%20cx%3D%2750%27%20cy%3D%2750%27%20r%3D%2750%27%20fill%3D%27%235c3a21%27/%3E%0A%20%20%3Crect%20x%3D%2725%27%20y%3D%2735%27%20width%3D%2750%27%20height%3D%2730%27%20rx%3D%275%27%20fill%3D%27%23ffffff%27%20opacity%3D%270.9%27/%3E%0A%20%20%3Cpath%20d%3D%27M75%2045v10H60v-10h15z%27%20fill%3D%27%235c3a21%27/%3E%0A%20%20%3Ccircle%20cx%3D%2767.5%27%20cy%3D%2750%27%20r%3D%272.5%27%20fill%3D%27%23ffffff%27/%3E%0A%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20100%20100%27%3E%0A%20%20%3Ccircle%20cx%3D%2750%27%20cy%3D%2750%27%20r%3D%2750%27%20fill%3D%27%235c3a21%27/%3E%0A%20%20%3Crect%20x%3D%2725%27%20y%3D%2735%27%20width%3D%2750%27%20height%3D%2730%27%20rx%3D%275%27%20fill%3D%27%23ffffff%27%20opacity%3D%270.9%27/%3E%0A%20%20%3Cpath%20d%3D%27M75%2045v10H60v-10h15z%27%20fill%3D%27%235c3a21%27/%3E%0A%20%20%3Ccircle%20cx%3D%2767.5%27%20cy%3D%2750%27%20r%3D%272.5%27%20fill%3D%27%23ffffff%27/%3E%0A%3C/svg%3E">
     
     <title>Rozpočet</title>
     <style>
@@ -28,28 +28,40 @@
             --modal-overlay: rgba(15, 23, 42, 0.6);
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #0f172a;
-                --card-bg: #1e293b;
-                --text-color: #f8fafc;
-                --text-muted: #94a3b8;
-                --primary: #10d577;
-                --danger: #f87171;
-                --border-color: #334155;
-                --modal-overlay: rgba(0, 0, 0, 0.7);
-            }
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #10d577;
+            --danger: #f87171;
+            --border-color: #334155;
+            --modal-overlay: rgba(0, 0, 0, 0.7);
         }
 
-        html, body { background-color: var(--bg-color); min-height: 100vh; margin: 0; overscroll-behavior-y: none; }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--text-color); padding: calc(15px + env(safe-area-inset-top)) 15px calc(40px + env(safe-area-inset-bottom)) 15px; touch-action: manipulation; display: flex; flex-direction: column; gap: 20px; }
+        html, body { background-color: var(--bg-color); min-height: 100vh; margin: 0; overscroll-behavior-y: none; transition: background-color 0.3s; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--text-color); padding: calc(15px + env(safe-area-inset-top)) 15px calc(40px + env(safe-area-inset-bottom)) 15px; touch-action: manipulation; display: flex; flex-direction: column; gap: 20px; transition: color 0.3s; }
         
         .top-bar { display: flex; justify-content: space-between; align-items: center; }
         .header-left { display: flex; align-items: center; gap: 12px; }
         
-        .savings-badge { background-color: var(--card-bg); padding: 8px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+        .theme-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: auto;
+            margin-right: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: background-color 0.3s;
+        }
+
+        .savings-badge { background-color: var(--card-bg); padding: 8px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border-color); transition: background-color 0.3s; }
         
-        .hero-card { background-color: var(--card-bg); border-radius: var(--border-radius); padding: 25px 20px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid var(--border-color); transition: color 0.3s; }
+        .hero-card { background-color: var(--card-bg); border-radius: var(--border-radius); padding: 25px 20px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid var(--border-color); transition: background-color 0.3s, color 0.3s; }
         .hero-label { text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 5px; }
         .hero-amount { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 0; line-height: 1.1; transition: color 0.3s; }
         
@@ -60,15 +72,27 @@
         .clickable-budget:active { background-color: var(--bg-color); border-color: var(--border-color); }
         .clickable-budget:hover { background-color: var(--bg-color); }
 
-        .input-section { background-color: var(--card-bg); border-radius: var(--border-radius); padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        .input-section { background-color: var(--card-bg); border-radius: var(--border-radius); padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border-color); transition: background-color 0.3s; }
         .amount-input-wrapper { position: relative; margin-bottom: 15px; }
-        .amount-input { width: 100%; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; font-size: 1.5rem; font-weight: bold; color: var(--text-color); text-align: center; box-sizing: border-box; outline: none; }
+        .amount-input { width: 100%; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; font-size: 1.5rem; font-weight: bold; color: var(--text-color); text-align: center; box-sizing: border-box; outline: none; transition: background-color 0.3s, color 0.3s; }
         .amount-input:focus { border-color: var(--primary); }
         
         .quick-tags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .tag-btn { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 10px 5px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: transform 0.1s, background-color 0.2s; }
+        .tag-btn { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 10px 5px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: transform 0.1s, background-color 0.3s, color 0.3s; }
         .tag-btn:active { transform: scale(0.95); }
-        .tag-btn.custom { background-color: var(--text-color); color: var(--bg-color); border: none; grid-column: span 3; padding: 15px; flex-direction: row; justify-content: center; font-size: 1rem;}
+        
+        /* Nový styl pro tmavé tlačítko Jiné */
+        .tag-btn.custom { 
+            background-color: #334155; 
+            color: #ffffff; 
+            border: none; 
+            grid-column: span 3; 
+            padding: 15px; 
+            flex-direction: row; 
+            justify-content: center; 
+            font-size: 1rem;
+        }
+        [data-theme="dark"] .tag-btn.custom { background-color: #0f172a; }
         
         .expense-list { list-style: none; padding: 0; margin: 0; }
         .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
@@ -78,14 +102,14 @@
         .expense-amount { font-weight: bold; color: var(--danger); font-size: 1.1rem; display: flex; align-items: center; gap: 15px; }
         .delete-btn { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; padding: 5px; cursor: pointer; }
         
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--modal-overlay); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-        .modal-content { background-color: var(--card-bg); padding: 25px; border-radius: var(--border-radius); width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--modal-overlay); justify-content: center; align-items: center; z-index: 1000; padding: 15px; transition: background-color 0.3s; }
+        .modal-content { background-color: var(--card-bg); padding: 25px; border-radius: var(--border-radius); width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transition: background-color 0.3s; }
         .modal-content h2 { margin-top: 0; font-size: 1.3rem; }
-        .modal-content input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-color); box-sizing: border-box; font-size: 1.1rem; }
+        .modal-content input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-color); box-sizing: border-box; font-size: 1.1rem; transition: background-color 0.3s, color 0.3s; }
         
         .btn { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-        .btn-outline { width: 100%; background-color: transparent; color: var(--text-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
-        .btn-secondary { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); }
+        .btn-outline { width: 100%; background-color: transparent; color: var(--text-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: color 0.3s, border-color 0.3s; }
+        .btn-secondary { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
     </style>
 </head>
 <body>
@@ -93,8 +117,9 @@
     <div class="top-bar">
         <div class="header-left">
             <h2 style="margin:0; font-size: 1.3rem;">Rozpočet</h2>
-            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">v2.1</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">v3.0</span>
         </div>
+        <button class="theme-btn" id="themeToggle" onclick="toggleTheme()">🌙 Noc</button>
         <div class="savings-badge">
             Úspory: <span id="totalSavingsDisplay">0</span> Kč
         </div>
@@ -132,7 +157,7 @@
             <button class="tag-btn" onclick="addQuickExpense('☕ Kafe')"><span style="font-size: 1.5rem;">☕</span> Kafe</button>
             <button class="tag-btn" onclick="addQuickExpense('🍽️ Restaurace')"><span style="font-size: 1.5rem;">🍽️</span> Restaurace</button>
             
-            <button class="tag-btn custom" onclick="openCustomModal()"><span style="font-size: 1.3rem;">📝</span> Vlastní</button>
+            <button class="tag-btn custom" onclick="openCustomModal()"><span style="font-size: 1.3rem;">📝</span> Jiné</button>
         </div>
     </div>
 
@@ -142,7 +167,6 @@
         <ul class="expense-list" id="expenseList"></ul>
     </div>
 
-    <!-- Nové masivní tlačítko úplně dole -->
     <button class="btn btn-secondary" style="margin-bottom: 20px;" onclick="openEditIncomeModal()">
         ⚙️ Nastavení měsíčního rozpočtu
     </button>
@@ -193,6 +217,33 @@
         </div>
     </div>
         <script>
+        // --- LOGIKA PRO PŘEPÍNÁNÍ MOTIVU ---
+        const themeBtn = document.getElementById('themeToggle');
+        const metaThemeColor = document.getElementById('meta-theme-color');
+        
+        // Načtení uloženého motivu
+        if (localStorage.getItem('budgetTheme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeBtn.textContent = '☀️ Den';
+            metaThemeColor.setAttribute('content', '#0f172a');
+        }
+
+        function toggleTheme() {
+            const root = document.documentElement;
+            if (root.getAttribute('data-theme') === 'dark') {
+                root.removeAttribute('data-theme');
+                localStorage.setItem('budgetTheme', 'light');
+                themeBtn.textContent = '🌙 Noc';
+                metaThemeColor.setAttribute('content', '#f8fafc');
+            } else {
+                root.setAttribute('data-theme', 'dark');
+                localStorage.setItem('budgetTheme', 'dark');
+                themeBtn.textContent = '☀️ Den';
+                metaThemeColor.setAttribute('content', '#0f172a');
+            }
+        }
+
+        // --- ZÁKLADNÍ LOGIKA ROZPOČTU ---
         let pendingUnspent = 0;
         let budgetData = JSON.parse(localStorage.getItem('myBudgetApp'));
 
@@ -350,6 +401,7 @@
             });
         }
 
+        // --- SPRÁVA PŘÍJMŮ A ÚPRAVY ---
         function saveIncome() {
             const val = parseFloat(document.getElementById('incomeInput').value);
             if (val > 0) {
@@ -395,6 +447,7 @@
             }
         }
 
+        // --- ZADÁVÁNÍ VÝDAJŮ ---
         function addQuickExpense(description) {
             const amountInput = document.getElementById('quickAmount');
             const amount = parseFloat(amountInput.value);
