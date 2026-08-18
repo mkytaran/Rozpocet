@@ -1,6 +1,4 @@
-
-            
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
@@ -12,12 +10,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Zcela nová vygenerovaná SVG ikonka (Hnědá peněženka, bankovka, zelené pozadí) -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Rozpočet","short_name":"Rozpočet","display":"standalone","start_url":"./?v=6","background_color":"#f8fafc","theme_color":"#10b981","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%2310b981%22/%3E%3Crect x=%2230%22 y=%2225%22 width=%2240%22 height=%2235%22 rx=%222%22 fill=%22%23d9f99d%22/%3E%3Ccircle cx=%2250%22 cy=%2235%22 r=%225%22 fill=%22%2384cc16%22/%3E%3Crect x=%2235%22 y=%2228%22 width=%2230%22 height=%2214%22 rx=%221%22 fill=%22none%22 stroke=%22%2384cc16%22 stroke-width=%221.5%22/%3E%3Crect x=%2220%22 y=%2245%22 width=%2260%22 height=%2235%22 rx=%226%22 fill=%22%23784a2a%22/%3E%3Cpath d=%22M20 55 Q50 65 80 55 V74 A6 6 0 0 1 74 80 H26 A6 6 0 0 1 20 74 Z%22 fill=%22%235c3a21%22/%3E%3Crect x=%2246%22 y=%2260%22 width=%228%22 height=%2212%22 rx=%222%22 fill=%22%23fbbf24%22/%3E%3C/svg%3E","sizes":"192x192 512x512","type":"image/svg+xml","purpose":"any maskable"}]}'>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2310b981'/%3E%3Crect x='30' y='25' width='40' height='35' rx='2' fill='%23d9f99d'/%3E%3Ccircle cx='50' cy='35' r='5' fill='%2384cc16'/%3E%3Crect x='35' y='28' width='30' height='14' rx='1' fill='none' stroke='%2384cc16' stroke-width='1.5'/%3E%3Crect x='20' y='45' width='60' height='35' rx='6' fill='%23784a2a'/%3E%3Cpath d='M20 55 Q50 65 80 55 V74 A6 6 0 0 1 74 80 H26 A6 6 0 0 1 20 74 Z' fill='%235c3a21'/%3E%3Crect x='46' y='60' width='8' height='12' rx='2' fill='%23fbbf24'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2310b981'/%3E%3Crect x='30' y='25' width='40' height='35' rx='2' fill='%23d9f99d'/%3E%3Ccircle cx='50' cy='35' r='5' fill='%2384cc16'/%3E%3Crect x='35' y='28' width='30' height='14' rx='1' fill='none' stroke='%2384cc16' stroke-width='1.5'/%3E%3Crect x='20' y='45' width='60' height='35' rx='6' fill='%23784a2a'/%3E%3Cpath d='M20 55 Q50 65 80 55 V74 A6 6 0 0 1 74 80 H26 A6 6 0 0 1 20 74 Z' fill='%235c3a21'/%3E%3Crect x='46' y='60' width='8' height='12' rx='2' fill='%23fbbf24'/%3E%3C/svg%3E">
+    <!-- Nezničitelný Base64 manifest pro Android -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUm96cG/EjWV0Iiwic2hvcnRfbmFtZSI6IlJvenBvxI1ldCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwic3RhcnRfdXJsIjoiLi8/dj03IiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGZhZmMiLCJ0aGVtZV9jb2xvciI6IiMxMGI5ODEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2NoYXJzZXQ9dXRmLTgsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnJTNFJTNDY2lyY2xlIGN4PSc1MCcgY3k9JzUwJyByPSc1MCcgZmlsbD0nJTIzMTBiOTgxJy8lM0UlM0NyZWN0IHg9JzMwJyB5PScyNScgd2lkdGg9JzQwJyBoZWlnaHQ9JzM1JyByeD0nMicgZmlsbD0nJTIzZDlmOTlkJy8lM0UlM0NjaXJjbGUgY3g9JzUwJyBjeT0nMzUnIHI9JzUnIGZpbGw9JyUyMzg0Y2MxNicvJTNFJTNDcmVjdCB4PSczNScgeT0nMjgnIHdpZHRoPSczMCcgaGVpZ2h0PScxNCcgcng9JzEnIGZpbGw9J25vbmUnIHN0cm9rZT0nJTIzODRjYzE2JyBzdHJva2Utd2lkdGg9JzEuNScvJTNFJTNDcmVjdCB4PScyMCcgeT0nNDUnIHdpZHRoPSc2MCcgaGVpZ2h0PSczNScgcng9JzYnIGZpbGw9JyUyMzc4NGEyYScvJTNFJTNDcGF0aCBkPSdNMjAgNTUgUTUwIDY1IDgwIDU1IFY3NCBBNiA2IDAgMCAxIDc0IDgwIEgyNiBBNiA2IDAgMCAxIDIwIDc0IFonIGZpbGw9JyUyMzVjM2EyMScvJTNFJTNDcmVjdCB4PSc0NicgeT0nNjAnIHdpZHRoPSc4JyBoZWlnaHQ9JzEyJyByeD0nMicgZmlsbD0nJTIzZmJiZjI0Jy8lM0UlM0Mvc3ZnJTNFIiwic2l6ZXMiOiIxOTJ4MTkyIDUxMng1MTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
+    <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ccircle%20cx%3D%2750%27%20cy%3D%2750%27%20r%3D%2750%27%20fill%3D%27%2310b981%27/%3E%3Crect%20x%3D%2730%27%20y%3D%2725%27%20width%3D%2740%27%20height%3D%2735%27%20rx%3D%272%27%20fill%3D%27%23d9f99d%27/%3E%3Ccircle%20cx%3D%2750%27%20cy%3D%2735%27%20r%3D%275%27%20fill%3D%27%2384cc16%27/%3E%3Crect%20x%3D%2735%27%20y%3D%2728%27%20width%3D%2730%27%20height%3D%2714%27%20rx%3D%271%27%20fill%3D%27none%27%20stroke%3D%27%2384cc16%27%20stroke-width%3D%271.5%27/%3E%3Crect%20x%3D%2720%27%20y%3D%2745%27%20width%3D%2760%27%20height%3D%2735%27%20rx%3D%276%27%20fill%3D%27%23784a2a%27/%3E%3Cpath%20d%3D%27M20%2055%20Q50%2065%2080%2055%20V74%20A6%206%200%200%201%2074%2080%20H26%20A6%206%200%200%201%2020%2074%20Z%27%20fill%3D%27%235c3a21%27/%3E%3Crect%20x%3D%2746%27%20y%3D%2760%27%20width%3D%278%27%20height%3D%2712%27%20rx%3D%272%27%20fill%3D%27%23fbbf24%27/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ccircle%20cx%3D%2750%27%20cy%3D%2750%27%20r%3D%2750%27%20fill%3D%27%2310b981%27/%3E%3Crect%20x%3D%2730%27%20y%3D%2725%27%20width%3D%2740%27%20height%3D%2735%27%20rx%3D%272%27%20fill%3D%27%23d9f99d%27/%3E%3Ccircle%20cx%3D%2750%27%20cy%3D%2735%27%20r%3D%275%27%20fill%3D%27%2384cc16%27/%3E%3Crect%20x%3D%2735%27%20y%3D%2728%27%20width%3D%2730%27%20height%3D%2714%27%20rx%3D%271%27%20fill%3D%27none%27%20stroke%3D%27%2384cc16%27%20stroke-width%3D%271.5%27/%3E%3Crect%20x%3D%2720%27%20y%3D%2745%27%20width%3D%2760%27%20height%3D%2735%27%20rx%3D%276%27%20fill%3D%27%23784a2a%27/%3E%3Cpath%20d%3D%27M20%2055%20Q50%2065%2080%2055%20V74%20A6%206%200%200%201%2074%2080%20H26%20A6%206%200%200%201%2020%2074%20Z%27%20fill%3D%27%235c3a21%27/%3E%3Crect%20x%3D%2746%27%20y%3D%2760%27%20width%3D%278%27%20height%3D%2712%27%20rx%3D%272%27%20fill%3D%27%23fbbf24%27/%3E%3C/svg%3E">
     
     <title>Rozpočet</title>
+            
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -125,7 +124,7 @@
     <div class="top-bar">
         <div class="header-left">
             <h2 style="margin:0; font-size: 1.3rem;">Rozpočet</h2>
-            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">v6.0</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">v7.0</span>
         </div>
         <button class="theme-btn" id="themeToggle" onclick="toggleTheme()">🌙 Noc</button>
         <div class="savings-badge" onclick="openWithdrawModal()" title="Kliknutím přesuneš peníze z úspor zpět">
