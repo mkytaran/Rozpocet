@@ -10,7 +10,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Vygenerovaná ikonka peněženky -->
     <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUm96cG/EjWV0IiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJzdGFydF91cmwiOiIuIiwiYmFja2dyb3VuZF9jb2xvciI6IiMxZTI5M2IiLCJ0aGVtZV9jb2xvciI6IiMxZTI5M2IiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2NoYXJzZXQ9dXRmLTgsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnJTNFJTNQ2lyY2xlIGN4PSc1MCcgY3k9JzUwJyByPSc1MCcgZmlsbD0nJTIzMTBkNTc3Jy8lM0UlM0N0ZXh0IHg9JzUwJyB5PSc2OCcgZm9udC1zaXplPSc0NScgdGV4dC1hbmNob3I9J21pZGRsZSclM0Xwn5SbJTNDL3RleHQlM0UlM0Mvc3ZnJTUyIiwic2l6ZXMiOiIxOTJ4MTkyIDUxMng1MTIgYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
     <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2310d577'/%3E%3Ctext x='50' y='68' font-size='45' text-anchor='middle'%3E👛%3C/text%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2310d577'/%3E%3Ctext x='50' y='68' font-size='45' text-anchor='middle'%3E👛%3C/text%3E%3C/svg%3E">
@@ -22,8 +21,8 @@
             --card-bg: #ffffff;
             --text-color: #0f172a;
             --text-muted: #64748b;
-            --primary: #10b981; /* Svěží zelená */
-            --danger: #ef4444; /* Červená pro výdaje */
+            --primary: #10b981; 
+            --danger: #ef4444; 
             --border-radius: 16px;
             --border-color: #e2e8f0;
             --modal-overlay: rgba(15, 23, 42, 0.6);
@@ -42,231 +41,45 @@
             }
         }
 
-        html, body {
-            background-color: var(--bg-color);
-            min-height: 100vh;
-            margin: 0;
-            overscroll-behavior-y: none;
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: var(--text-color);
-            padding: calc(15px + env(safe-area-inset-top)) 15px calc(40px + env(safe-area-inset-bottom)) 15px;
-            touch-action: manipulation;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* Úspory a Hlavička */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        html, body { background-color: var(--bg-color); min-height: 100vh; margin: 0; overscroll-behavior-y: none; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--text-color); padding: calc(15px + env(safe-area-inset-top)) 15px calc(40px + env(safe-area-inset-bottom)) 15px; touch-action: manipulation; display: flex; flex-direction: column; gap: 20px; }
         
-        .savings-badge {
-            background-color: var(--card-bg);
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: var(--primary);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color);
-        }
-
-        /* Denní limit Hero sekce */
-        .hero-card {
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 25px 20px;
-            text-align: center;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
-        }
-
-        .hero-label {
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-        }
-
-        .hero-amount {
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin: 0;
-            line-height: 1.1;
-        }
-
-        .hero-sub {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-        .hero-sub div span { display: block; font-weight: bold; font-size: 1.1rem; margin-top: 3px; }
-
-        /* Rychlé zadávání */
-        .input-section {
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
-        }
-
-        .amount-input-wrapper {
-            position: relative;
-            margin-bottom: 15px;
-        }
-
-        .amount-input {
-            width: 100%;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--text-color);
-            text-align: center;
-            box-sizing: border-box;
-            outline: none;
-        }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; }
+        .savings-badge { background-color: var(--card-bg); padding: 8px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
         
-        .amount-input:focus {
-            border-color: var(--primary);
-        }
-
-        .quick-tags {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .tag-btn {
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            border-radius: 12px;
-            padding: 10px 5px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            transition: transform 0.1s, background-color 0.2s;
-        }
-
-        .tag-btn:active {
-            transform: scale(0.95);
-        }
-
-        .tag-btn.custom {
-            background-color: var(--text-color);
-            color: var(--bg-color);
-            border: none;
-        }
-
-        /* Seznam výdajů */
-        .expense-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .expense-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .expense-item:last-child {
-            border-bottom: none;
-        }
-
-        .expense-info strong {
-            display: block;
-            font-size: 1.1rem;
-        }
+        .hero-card { background-color: var(--card-bg); border-radius: var(--border-radius); padding: 25px 20px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid var(--border-color); transition: color 0.3s; }
+        .hero-label { text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 5px; }
+        .hero-amount { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 0; line-height: 1.1; transition: color 0.3s; }
         
-        .expense-info small {
-            color: var(--text-muted);
-        }
-
-        .expense-amount {
-            font-weight: bold;
-            color: var(--danger);
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        /* Modals */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--modal-overlay);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 15px;
-        }
-
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 25px;
-            border-radius: var(--border-radius);
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-
+        .hero-sub { display: flex; justify-content: space-around; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-muted); }
+        .hero-sub div span { display: block; font-weight: bold; font-size: 1.1rem; margin-top: 3px; color: var(--text-color); }
+        
+        .input-section { background-color: var(--card-bg); border-radius: var(--border-radius); padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        .amount-input-wrapper { position: relative; margin-bottom: 15px; }
+        .amount-input { width: 100%; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; font-size: 1.5rem; font-weight: bold; color: var(--text-color); text-align: center; box-sizing: border-box; outline: none; }
+        .amount-input:focus { border-color: var(--primary); }
+        
+        /* Úprava mřížky pro 7 tlačítek (2 řady po 3 + 1 dlouhé vlastní) */
+        .quick-tags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .tag-btn { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 10px 5px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: transform 0.1s, background-color 0.2s; }
+        .tag-btn:active { transform: scale(0.95); }
+        .tag-btn.custom { background-color: var(--text-color); color: var(--bg-color); border: none; grid-column: span 3; padding: 15px; flex-direction: row; justify-content: center; font-size: 1rem;}
+        
+        .expense-list { list-style: none; padding: 0; margin: 0; }
+        .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+        .expense-item:last-child { border-bottom: none; }
+        .expense-info strong { display: block; font-size: 1.1rem; }
+        .expense-info small { color: var(--text-muted); }
+        .expense-amount { font-weight: bold; color: var(--danger); font-size: 1.1rem; display: flex; align-items: center; gap: 15px; }
+        .delete-btn { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; padding: 5px; cursor: pointer; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--modal-overlay); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+        .modal-content { background-color: var(--card-bg); padding: 25px; border-radius: var(--border-radius); width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .modal-content h2 { margin-top: 0; font-size: 1.3rem; }
-        .modal-content input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--bg-color);
-            color: var(--text-color);
-            box-sizing: border-box;
-            font-size: 1.1rem;
-        }
-
-        .btn {
-            width: 100%;
-            background-color: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .modal-content input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-color); box-sizing: border-box; font-size: 1.1rem; }
+        
+        .btn { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn-outline { width: 100%; background-color: transparent; color: var(--text-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -285,7 +98,7 @@
         
         <div class="hero-sub">
             <div>
-                Zbývá peněz
+                Zůstává na měsíc
                 <span id="remainingMonthDisplay">0 Kč</span>
             </div>
             <div>
@@ -295,37 +108,48 @@
         </div>
     </div>
 
-    <!-- Sekce bleskového zadávání -->
+    <!-- Rychlé zadávání -->
     <div class="input-section">
         <div class="amount-input-wrapper">
             <input type="number" id="quickAmount" class="amount-input" placeholder="Zadej útratu (Kč)..." inputmode="numeric">
         </div>
         
         <div class="quick-tags">
-            <button class="tag-btn" onclick="addQuickExpense('🛒 Potraviny')"><span style="font-size: 1.5rem;">🛒</span> Potraviny</button>
-            <button class="tag-btn" onclick="addQuickExpense('☕ Výběrová káva')"><span style="font-size: 1.5rem;">☕</span> Káva</button>
-            <button class="tag-btn" onclick="addQuickExpense('⛽ Honda (Palivo)')"><span style="font-size: 1.5rem;">⛽</span> Auto</button>
-            <button class="tag-btn" onclick="addQuickExpense('🎸 Kytara / Zájmy')"><span style="font-size: 1.5rem;">🎸</span> Koníčky</button>
-            <button class="tag-btn" onclick="addQuickExpense('🍽️ Restaurace')"><span style="font-size: 1.5rem;">🍽️</span> Jídlo venku</button>
-            <button class="tag-btn custom" onclick="openCustomModal()"><span style="font-size: 1.5rem;">📝</span> Vlastní</button>
+            <button class="tag-btn" onclick="addQuickExpense('🚌 Doprava')"><span style="font-size: 1.5rem;">🚌</span> Doprava</button>
+            <button class="tag-btn" onclick="addQuickExpense('🛒 Jídlo')"><span style="font-size: 1.5rem;">🛒</span> Jídlo</button>
+            <button class="tag-btn" onclick="addQuickExpense('🧴 Drogerie')"><span style="font-size: 1.5rem;">🧴</span> Drogerie</button>
+            
+            <button class="tag-btn" onclick="addQuickExpense('🎬 Zábava')"><span style="font-size: 1.5rem;">🎬</span> Zábava</button>
+            <button class="tag-btn" onclick="addQuickExpense('☕ Kafe')"><span style="font-size: 1.5rem;">☕</span> Kafe</button>
+            <button class="tag-btn" onclick="addQuickExpense('🍽️ Restaurace')"><span style="font-size: 1.5rem;">🍽️</span> Restaurace</button>
+            
+            <button class="tag-btn custom" onclick="openCustomModal()"><span style="font-size: 1.3rem;">📝</span> Vlastní</button>
         </div>
     </div>
 
     <!-- Výpis historie -->
     <div class="hero-card" style="padding: 15px 20px;">
-        <div class="hero-label" style="margin-bottom: 15px; text-align: left;">Tento měsíc</div>
-        <ul class="expense-list" id="expenseList">
-            <!-- Dynamicky generováno -->
-        </ul>
+        <div class="hero-label" style="margin-bottom: 15px; text-align: left;">Historie výdajů</div>
+        <ul class="expense-list" id="expenseList"></ul>
     </div>
 
-    <!-- Modál pro zadání příjmu nového měsíce -->
+    <!-- Modál pro Nový měsíc -->
     <div class="modal-overlay" id="incomeModal">
         <div class="modal-content">
             <h2>Nový měsíc! 💸</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Zadej svůj rozpočet (příjem) na aktuální měsíc. Předchozí zůstatek byl přesunut do úspor.</p>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Zadej svůj rozpočet (příjem) na aktuální měsíc. Předchozí zůstatek byl převeden do úspor.</p>
             <input type="number" id="incomeInput" placeholder="Zadej částku (Kč)" inputmode="numeric">
-            <button class="btn" onclick="saveIncome()">Uložit a začít měsíc</button>
+            <button class="btn" onclick="saveIncome()">Začít měsíc</button>
+        </div>
+    </div>
+
+    <!-- Modál pro Zpracování nevyužitých prostředků (Nový den) -->
+    <div class="modal-overlay" id="dayChangeModal">
+        <div class="modal-content">
+            <h2>Dobré ráno! ☀️</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Z minulých dnů se ti podařilo ušetřit <strong id="unspentDisplay" style="color: var(--primary);">0 Kč</strong>. Co s nimi chceš udělat?</p>
+            <button class="btn" onclick="resolveDayChange('save')">Uložit do úspor</button>
+            <button class="btn-outline" onclick="resolveDayChange('distribute')">Rozpočítat k útratě</button>
         </div>
     </div>
 
@@ -333,80 +157,151 @@
     <div class="modal-overlay" id="customModal">
         <div class="modal-content">
             <h2>Zapsat výdaj</h2>
-            <input type="text" id="customDesc" placeholder="Za co to bylo? (např. Boty)">
+            <input type="text" id="customDesc" placeholder="Za co to bylo?">
             <input type="date" id="customDate">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn" style="background-color: var(--border-color); color: var(--text-color);" onclick="closeCustomModal()">Zrušit</button>
-                <button class="btn" onclick="saveCustomExpense()">Uložit</button>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn-outline" style="margin-bottom: 0;" onclick="closeCustomModal()">Zrušit</button>
+                <button class="btn" style="margin-bottom: 0;" onclick="saveCustomExpense()">Uložit</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA STRUCTURE ---
-        let budgetData = JSON.parse(localStorage.getItem('myBudgetApp')) || {
-            monthId: '',
-            income: 0,
-            expenses: [],
-            totalSavings: 0
-        };
+        let pendingUnspent = 0;
+        let budgetData = JSON.parse(localStorage.getItem('myBudgetApp'));
 
-        // --- CORE LOGIC ---
+        // Ošetření struktury pro nové proměnné
+        if (!budgetData || !budgetData.monthId) {
+            budgetData = { monthId: '', income: 0, expenses: [], totalSavings: 0, savedThisMonth: 0, allocatedDailyLimit: 0, lastCheckedDate: '' };
+        } else {
+            if (budgetData.savedThisMonth === undefined) budgetData.savedThisMonth = 0;
+            if (budgetData.allocatedDailyLimit === undefined) budgetData.allocatedDailyLimit = 0;
+            if (budgetData.lastCheckedDate === undefined) budgetData.lastCheckedDate = '';
+        }
+
+        // Pomocné funkce
+        function getTodayStr() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        function getDaysLeftInMonth() {
+            const today = new Date();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            return daysInMonth - today.getDate() + 1; // Včetně dneška
+        }
+
+        function formatMoney(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        // Inicializace
         function initApp() {
             const today = new Date();
-            const currentMonthId = `${today.getFullYear()}-${today.getMonth() + 1}`; // e.g. "2026-8"
+            const currentMonthId = `${today.getFullYear()}-${today.getMonth() + 1}`;
+            const todayStr = getTodayStr();
 
-            // Kontrola přelomu měsíce
+            // 1. Kontrola přelomu měsíce
             if (budgetData.monthId !== currentMonthId) {
                 if (budgetData.monthId !== '') {
-                    // Převedení zbytků do úspor
-                    const totalExpenses = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
-                    const remaining = budgetData.income - totalExpenses;
-                    if (remaining > 0) {
-                        budgetData.totalSavings += remaining;
-                    }
+                    const totalEx = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
+                    const remaining = budgetData.income - totalEx - budgetData.savedThisMonth;
+                    if (remaining > 0) budgetData.totalSavings += remaining;
                 }
                 
-                // Reset pro nový měsíc
                 budgetData.monthId = currentMonthId;
                 budgetData.income = 0;
                 budgetData.expenses = [];
+                budgetData.savedThisMonth = 0;
+                budgetData.allocatedDailyLimit = 0;
+                budgetData.lastCheckedDate = todayStr;
                 saveData();
-            }
-
-            if (budgetData.income === 0) {
+                
                 document.getElementById('incomeModal').style.display = 'flex';
-                document.getElementById('incomeInput').focus();
+                return;
             }
 
+            // 2. Kontrola přelomu dne (zda se včera ušetřilo)
+            if (budgetData.income > 0 && budgetData.lastCheckedDate !== todayStr && budgetData.lastCheckedDate !== '') {
+                const totalEx = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
+                const availableForMonth = budgetData.income - totalEx - budgetData.savedThisMonth;
+                const daysLeftToday = getDaysLeftInMonth();
+                
+                // Kolik zbylo z předpokládaného plánu
+                const unspent = availableForMonth - (budgetData.allocatedDailyLimit * daysLeftToday);
+                
+                if (unspent >= 1) {
+                    // Měl rezervu, ptáme se co s tím
+                    pendingUnspent = Math.floor(unspent);
+                    document.getElementById('unspentDisplay').innerText = formatMoney(pendingUnspent) + ' Kč';
+                    document.getElementById('dayChangeModal').style.display = 'flex';
+                    return; // Čekáme na interakci uživatele
+                } else {
+                    // Přesáhl rozpočet, automaticky snížíme limit na zbytek dnů
+                    budgetData.allocatedDailyLimit = availableForMonth / daysLeftToday;
+                    budgetData.lastCheckedDate = todayStr;
+                    saveData();
+                }
+            }
+
+            updateUI();
+        }
+
+        // Odpověď uživatele na nový den
+        function resolveDayChange(action) {
+            const todayStr = getTodayStr();
+            const daysLeftToday = getDaysLeftInMonth();
+            
+            if (action === 'save') {
+                budgetData.savedThisMonth += pendingUnspent;
+                budgetData.totalSavings += pendingUnspent;
+            }
+            
+            // Přepočet limitu dle nové situace (pro action='save' zůstane stejný, pro 'distribute' se zvýší)
+            const totalEx = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
+            const newAvailable = budgetData.income - totalEx - budgetData.savedThisMonth;
+            
+            budgetData.allocatedDailyLimit = newAvailable / daysLeftToday;
+            budgetData.lastCheckedDate = todayStr;
+            
+            document.getElementById('dayChangeModal').style.display = 'none';
+            saveData();
             updateUI();
         }
 
         function saveData() {
             localStorage.setItem('myBudgetApp', JSON.stringify(budgetData));
-            updateUI();
         }
 
-        // --- MATH & UI UPDATES ---
         function updateUI() {
-            const today = new Date();
-            
-            // Kolik má měsíc celkem dní (poslední den v měsíci)
-            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-            // Zbývající dny VČETNĚ dneška
-            const daysLeft = daysInMonth - today.getDate() + 1;
+            const todayStr = getTodayStr();
+            const daysLeft = getDaysLeftInMonth();
 
             const totalExpenses = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
-            const remaining = budgetData.income - totalExpenses;
             
-            // Ošetření, aby denní limit nešel do mínusu, pokud se přečerpá měsíc
-            const dailyLimit = remaining > 0 ? Math.floor(remaining / daysLeft) : 0;
+            // Výdaje, které jsou označené dnešním datem
+            const todayExpenses = budgetData.expenses
+                .filter(item => item.date === todayStr)
+                .reduce((sum, item) => sum + item.amount, 0);
 
-            // Zápis do HTML
-            document.getElementById('totalSavingsDisplay').innerText = formatMoney(budgetData.totalSavings);
-            document.getElementById('dailyLimitDisplay').innerText = formatMoney(dailyLimit) + ' Kč';
-            document.getElementById('remainingMonthDisplay').innerText = formatMoney(remaining) + ' Kč';
+            const availableForMonth = budgetData.income - totalExpenses - budgetData.savedThisMonth;
+            
+            // Dnes zbývá k útratě = můj přidělený limit minus to, co už jsem dnes reálně utratil
+            const availableToday = budgetData.allocatedDailyLimit - todayExpenses;
+
+            // Zobrazení
+            document.getElementById('totalSavingsDisplay').innerText = formatMoney(Math.floor(budgetData.totalSavings));
+            document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.floor(availableForMonth)) + ' Kč';
             document.getElementById('daysLeftDisplay').innerText = daysLeft;
+            
+            const limitDisplay = document.getElementById('dailyLimitDisplay');
+            limitDisplay.innerText = formatMoney(Math.floor(availableToday)) + ' Kč';
+            
+            if (availableToday < 0) {
+                limitDisplay.style.color = 'var(--danger)';
+            } else {
+                limitDisplay.style.color = 'var(--primary)';
+            }
 
             renderExpenseList();
         }
@@ -420,15 +315,15 @@
                 return;
             }
 
-            // Seřadit od nejnovějších
             const sorted = [...budgetData.expenses].sort((a, b) => b.id - a.id);
 
             sorted.forEach(item => {
                 const li = document.createElement('li');
                 li.className = 'expense-item';
                 
-                const dateObj = new Date(item.date);
-                const dateStr = `${dateObj.getDate()}.${dateObj.getMonth() + 1}.`;
+                // Formátování data YYYY-MM-DD na DD.MM.
+                const dateParts = item.date.split('-');
+                const dateStr = dateParts.length === 3 ? `${parseInt(dateParts[2])}.${parseInt(dateParts[1])}.` : item.date;
 
                 li.innerHTML = `
                     <div class="expense-info">
@@ -444,17 +339,17 @@
             });
         }
 
-        function formatMoney(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-        }
-
-        // --- ACTIONS ---
+        // --- AKCE ---
         function saveIncome() {
             const val = parseFloat(document.getElementById('incomeInput').value);
             if (val > 0) {
                 budgetData.income = val;
+                budgetData.lastCheckedDate = getTodayStr();
+                budgetData.allocatedDailyLimit = val / getDaysLeftInMonth();
+                
                 saveData();
                 document.getElementById('incomeModal').style.display = 'none';
+                updateUI();
             }
         }
 
@@ -463,69 +358,5 @@
             const amount = parseFloat(amountInput.value);
             
             if (!amount || amount <= 0) {
-                // Flash efekt při chybě
                 amountInput.style.borderColor = 'var(--danger)';
-                setTimeout(() => amountInput.style.borderColor = 'var(--border-color)', 500);
-                return;
-            }
-
-            const today = new Date().toISOString();
-            
-            budgetData.expenses.push({
-                id: Date.now(),
-                desc: description,
-                amount: amount,
-                date: today
-            });
-
-            amountInput.value = '';
-            saveData();
-        }
-
-        function deleteExpense(id) {
-            if(confirm('Smazat tento výdaj?')) {
-                budgetData.expenses = budgetData.expenses.filter(item => item.id !== id);
-                saveData();
-            }
-        }
-
-        // --- VLASTNÍ ZÁPIS (MODAL) ---
-        function openCustomModal() {
-            const amount = document.getElementById('quickAmount').value;
-            if(!amount) {
-                alert("Nejdřív napiš částku nahoře!");
-                return;
-            }
-            
-            document.getElementById('customDate').valueAsDate = new Date();
-            document.getElementById('customDesc').value = '';
-            document.getElementById('customModal').style.display = 'flex';
-            document.getElementById('customDesc').focus();
-        }
-
-        function closeCustomModal() {
-            document.getElementById('customModal').style.display = 'none';
-        }
-
-        function saveCustomExpense() {
-            const amount = parseFloat(document.getElementById('quickAmount').value);
-            const desc = document.getElementById('customDesc').value.trim() || 'Různé';
-            const dateVal = document.getElementById('customDate').value || new Date().toISOString();
-
-            budgetData.expenses.push({
-                id: Date.now(),
-                desc: desc,
-                amount: amount,
-                date: dateVal
-            });
-
-            document.getElementById('quickAmount').value = '';
-            closeCustomModal();
-            saveData();
-        }
-
-        // Spuštění po načtení stránky
-        initApp();
-    </script>
-</body>
-</html>
+                setTimeout(() => amou
