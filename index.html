@@ -59,7 +59,6 @@
         .amount-input { width: 100%; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; font-size: 1.5rem; font-weight: bold; color: var(--text-color); text-align: center; box-sizing: border-box; outline: none; }
         .amount-input:focus { border-color: var(--primary); }
         
-        /* Úprava mřížky pro 7 tlačítek (2 řady po 3 + 1 dlouhé vlastní) */
         .quick-tags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .tag-btn { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 10px 5px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: transform 0.1s, background-color 0.2s; }
         .tag-btn:active { transform: scale(0.95); }
@@ -80,12 +79,18 @@
         
         .btn { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         .btn-outline { width: 100%; background-color: transparent; color: var(--text-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        
+        .edit-budget-btn { background: none; border: none; font-size: 1.2rem; padding: 5px; cursor: pointer; color: var(--text-muted); transition: color 0.2s; }
+        .edit-budget-btn:active { color: var(--primary); }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <h2 style="margin:0; font-size: 1.2rem;">Rozpočet</h2>
+        <h2 style="margin:0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+            Rozpočet
+            <button class="edit-budget-btn" onclick="openEditIncomeModal()">✏️</button>
+        </h2>
         <div class="savings-badge">
             Úspory: <span id="totalSavingsDisplay">0</span> Kč
         </div>
@@ -143,6 +148,19 @@
         </div>
     </div>
 
+    <!-- Modál pro Úpravu rozpočtu (Editace) -->
+    <div class="modal-overlay" id="editIncomeModal">
+        <div class="modal-content">
+            <h2>Upravit rozpočet ⚙️</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Změň svůj celkový měsíční příjem. Denní limit na zbytek měsíce se z této nové částky automaticky přepočítá.</p>
+            <input type="number" id="editIncomeInput" placeholder="Zadej částku (Kč)" inputmode="numeric">
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn-outline" style="margin-bottom: 0;" onclick="closeEditIncomeModal()">Zrušit</button>
+                <button class="btn" style="margin-bottom: 0;" onclick="saveEditedIncome()">Uložit</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modál pro Zpracování nevyužitých prostředků (Nový den) -->
     <div class="modal-overlay" id="dayChangeModal">
         <div class="modal-content">
@@ -170,7 +188,6 @@
         let pendingUnspent = 0;
         let budgetData = JSON.parse(localStorage.getItem('myBudgetApp'));
 
-        // Ošetření struktury pro nové proměnné
         if (!budgetData || !budgetData.monthId) {
             budgetData = { monthId: '', income: 0, expenses: [], totalSavings: 0, savedThisMonth: 0, allocatedDailyLimit: 0, lastCheckedDate: '' };
         } else {
@@ -179,7 +196,6 @@
             if (budgetData.lastCheckedDate === undefined) budgetData.lastCheckedDate = '';
         }
 
-        // Pomocné funkce
         function getTodayStr() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -188,20 +204,18 @@
         function getDaysLeftInMonth() {
             const today = new Date();
             const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-            return daysInMonth - today.getDate() + 1; // Včetně dneška
+            return daysInMonth - today.getDate() + 1; 
         }
 
         function formatMoney(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
         }
 
-        // Inicializace
         function initApp() {
             const today = new Date();
             const currentMonthId = `${today.getFullYear()}-${today.getMonth() + 1}`;
             const todayStr = getTodayStr();
 
-            // 1. Kontrola přelomu měsíce
             if (budgetData.monthId !== currentMonthId) {
                 if (budgetData.monthId !== '') {
                     const totalEx = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
@@ -221,23 +235,19 @@
                 return;
             }
 
-            // 2. Kontrola přelomu dne (zda se včera ušetřilo)
             if (budgetData.income > 0 && budgetData.lastCheckedDate !== todayStr && budgetData.lastCheckedDate !== '') {
                 const totalEx = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
                 const availableForMonth = budgetData.income - totalEx - budgetData.savedThisMonth;
                 const daysLeftToday = getDaysLeftInMonth();
                 
-                // Kolik zbylo z předpokládaného plánu
                 const unspent = availableForMonth - (budgetData.allocatedDailyLimit * daysLeftToday);
                 
                 if (unspent >= 1) {
-                    // Měl rezervu, ptáme se co s tím
                     pendingUnspent = Math.floor(unspent);
                     document.getElementById('unspentDisplay').innerText = formatMoney(pendingUnspent) + ' Kč';
                     document.getElementById('dayChangeModal').style.display = 'flex';
-                    return; // Čekáme na interakci uživatele
+                    return; 
                 } else {
-                    // Přesáhl rozpočet, automaticky snížíme limit na zbytek dnů
                     budgetData.allocatedDailyLimit = availableForMonth / daysLeftToday;
                     budgetData.lastCheckedDate = todayStr;
                     saveData();
@@ -247,7 +257,6 @@
             updateUI();
         }
 
-        // Odpověď uživatele na nový den
         function resolveDayChange(action) {
             const todayStr = getTodayStr();
             const daysLeftToday = getDaysLeftInMonth();
@@ -257,7 +266,6 @@
                 budgetData.totalSavings += pendingUnspent;
             }
             
-            // Přepočet limitu dle nové situace (pro action='save' zůstane stejný, pro 'distribute' se zvýší)
             const totalEx = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
             const newAvailable = budgetData.income - totalEx - budgetData.savedThisMonth;
             
@@ -279,17 +287,13 @@
 
             const totalExpenses = budgetData.expenses.reduce((sum, item) => sum + item.amount, 0);
             
-            // Výdaje, které jsou označené dnešním datem
             const todayExpenses = budgetData.expenses
                 .filter(item => item.date === todayStr)
                 .reduce((sum, item) => sum + item.amount, 0);
 
             const availableForMonth = budgetData.income - totalExpenses - budgetData.savedThisMonth;
-            
-            // Dnes zbývá k útratě = můj přidělený limit minus to, co už jsem dnes reálně utratil
             const availableToday = budgetData.allocatedDailyLimit - todayExpenses;
 
-            // Zobrazení
             document.getElementById('totalSavingsDisplay').innerText = formatMoney(Math.floor(budgetData.totalSavings));
             document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.floor(availableForMonth)) + ' Kč';
             document.getElementById('daysLeftDisplay').innerText = daysLeft;
@@ -321,7 +325,6 @@
                 const li = document.createElement('li');
                 li.className = 'expense-item';
                 
-                // Formátování data YYYY-MM-DD na DD.MM.
                 const dateParts = item.date.split('-');
                 const dateStr = dateParts.length === 3 ? `${parseInt(dateParts[2])}.${parseInt(dateParts[1])}.` : item.date;
 
@@ -339,7 +342,7 @@
             });
         }
 
-        // --- AKCE ---
+        // --- SPRÁVA PŘÍJMŮ A ÚPRAVY ---
         function saveIncome() {
             const val = parseFloat(document.getElementById('incomeInput').value);
             if (val > 0) {
@@ -353,10 +356,4 @@
             }
         }
 
-        function addQuickExpense(description) {
-            const amountInput = document.getElementById('quickAmount');
-            const amount = parseFloat(amountInput.value);
-            
-            if (!amount || amount <= 0) {
-                amountInput.style.borderColor = 'var(--danger)';
-                setTimeout(() => amou
+        function openEditIncomeModal() {
