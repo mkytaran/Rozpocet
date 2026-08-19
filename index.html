@@ -124,7 +124,7 @@
     <div class="top-bar">
         <div class="header-left">
             <h2 style="margin:0; font-size: 1.3rem;">Rozpočet</h2>
-            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">v7.0</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">v8.0</span>
         </div>
         <button class="theme-btn" id="themeToggle" onclick="toggleTheme()">🌙 Noc</button>
         <div class="savings-badge" onclick="openWithdrawModal()" title="Kliknutím přesuneš peníze z úspor zpět">
@@ -194,24 +194,34 @@
         </div>
     </div>
 
-    <!-- Modál pro Úpravu rozpočtu -->
+        <!-- Modál pro Úpravu rozpočtu a Zálohování -->
     <div class="modal-overlay" id="editIncomeModal">
         <div class="modal-content">
-            <h2>Upravit rozpočet ⚙️</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Můžeš upravit celkový rozpočet nebo přidat peníze rovnou do úspor.</p>
+            <h2>Nastavení & Záloha ⚙️</h2>
             
             <label style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; display: block;">Měsíční příjem (Kč)</label>
             <input type="number" id="editIncomeInput" placeholder="Celková částka" inputmode="numeric">
             
-            <label style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; display: block;">Přidat další částku do úspor (Kč)</label>
-            <input type="number" id="editSavingsInput" placeholder="Zadej částku..." inputmode="numeric">
+            <label style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; display: block;">Přidat do úspor (Kč)</label>
+            <input type="number" id="editSavingsInput" placeholder="Zadej částku..." inputmode="numeric" style="margin-bottom: 25px;">
             
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="btn-outline" style="margin-bottom: 0;" onclick="closeEditIncomeModal()">Zrušit</button>
-                <button class="btn" style="margin-bottom: 0;" onclick="saveEditedIncome()">Uložit</button>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 20px; margin-bottom: 20px;">
+                <label style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; display: block;">Zálohování dat</label>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-outline" style="margin-bottom: 0; font-size: 1rem; padding: 10px;" onclick="exportBackup()">⬇️ Uložit</button>
+                    <button class="btn-outline" style="margin-bottom: 0; font-size: 1rem; padding: 10px;" onclick="document.getElementById('importFile').click()">⬆️ Obnovit</button>
+                    <!-- Skrytý input pro nahrání souboru -->
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importBackup(event)">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-outline" style="margin-bottom: 0; border: none;" onclick="closeEditIncomeModal()">Zrušit</button>
+                <button class="btn" style="margin-bottom: 0;" onclick="saveEditedIncome()">Uložit změny</button>
             </div>
         </div>
     </div>
+
 
     <!-- Modál pro Zpracování nevyužitých prostředků (Nový den) -->
     <div class="modal-overlay" id="dayChangeModal">
@@ -605,6 +615,48 @@
             closeCustomModal();
             saveData();
             updateUI();
+        }
+        // --- EXPORT A IMPORT ZÁLOHY ---
+        function exportBackup() {
+            const dataStr = JSON.stringify(budgetData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `rozpocet_zaloha_${getTodayStr()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData && importedData.expenses !== undefined) {
+                        if (confirm("Opravdu chceš přepsat současná data zálohou ze souboru?")) {
+                            budgetData = importedData;
+                            saveData();
+                            closeEditIncomeModal();
+                            updateUI();
+                            alert("Data byla úspěšně obnovena!");
+                        }
+                    } else {
+                        alert("Soubor nemá správný formát pro tuto aplikaci.");
+                    }
+                } catch (err) {
+                    alert("Chyba při čtení souboru. Je to platný JSON?");
+                }
+                // Vyčistit input, aby šel nahrát stejný soubor znovu
+                event.target.value = ''; 
+            };
+            reader.readAsText(file);
         }
 
         initApp();
