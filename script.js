@@ -1,8 +1,46 @@
+// --- PŘEPÍNÁNÍ MOTIVU (Světlý/Tmavý) ---
+function initTheme() {
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    const savedTheme = localStorage.getItem('budgetTheme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        if (themeBtn) themeBtn.textContent = '☀️';
+        if (metaThemeColor) metaThemeColor.setAttribute('content', '#0f172a');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        if (themeBtn) themeBtn.textContent = '🌙';
+        if (metaThemeColor) metaThemeColor.setAttribute('content', '#f8fafc');
+    }
+}
+
+function toggleTheme() {
+    const root = document.documentElement;
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    
+    if (root.getAttribute('data-theme') === 'dark') {
+        root.setAttribute('data-theme', 'light');
+        localStorage.setItem('budgetTheme', 'light');
+        themeBtn.textContent = '🌙';
+        metaThemeColor.setAttribute('content', '#f8fafc');
+    } else {
+        root.setAttribute('data-theme', 'dark');
+        localStorage.setItem('budgetTheme', 'dark');
+        themeBtn.textContent = '☀️';
+        metaThemeColor.setAttribute('content', '#0f172a');
+    }
+}
+
+initTheme();
+
 function getDateString(d) {
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
-// MIGRACE DAT ZE STARÉ VERZE APLIKACE
+// MIGRACE DAT
 let budgetData = JSON.parse(localStorage.getItem('myBudgetApp_v3'));
 
 if (!budgetData) {
@@ -86,7 +124,7 @@ function handleLeftover(action) {
         budgetData.totalSavings += leftover;
         budgetData.wallet = 0;
     } else if (action === 'dnesek') {
-        // Peníze zůstanou v budgetData.wallet
+        // Peníze zůstanou ve wallet
     }
     
     document.getElementById('dailyActionModal').style.display = 'none';
@@ -287,6 +325,48 @@ function executeManage(actionType) {
     saveData();
     updateUI();
     closeManageModal();
+}
+
+// --- NASTAVENÍ ---
+function openSettingsModal() {
+    document.getElementById('editIncomeInput').value = budgetData.income;
+    document.getElementById('withdrawSavingsInput').value = '';
+    document.getElementById('settingsModal').style.display = 'flex';
+}
+
+function closeSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'none';
+}
+
+function saveEditedIncome() {
+    const newIncome = parseFloat(document.getElementById('editIncomeInput').value);
+    if (newIncome && newIncome > 0) {
+        const difference = newIncome - budgetData.income;
+        budgetData.income = newIncome;
+        budgetData.monthPool += difference; 
+        
+        saveData();
+        updateUI();
+        alert('Měsíční rozpočet byl úspěšně upraven.');
+    }
+}
+
+function withdrawFromSavings() {
+    const amount = parseFloat(document.getElementById('withdrawSavingsInput').value);
+    if (amount && amount > 0) {
+        if (amount > budgetData.totalSavings) {
+            alert('Tolik peněz v úsporách nemáš.');
+            return;
+        }
+        
+        budgetData.totalSavings -= amount;
+        budgetData.monthPool += amount; 
+        
+        saveData();
+        updateUI();
+        document.getElementById('withdrawSavingsInput').value = '';
+        alert(`Částka ${amount} Kč byla vrácena z úspor do rozpočtu.`);
+    }
 }
 
 initApp();
