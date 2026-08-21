@@ -162,17 +162,37 @@ function saveData() {
     localStorage.setItem('myBudgetApp_v3', JSON.stringify(budgetData));
 }
 
+// --- VYKRESLOVÁNÍ OBRAZOVKY ---
 function updateUI() {
     document.getElementById('totalSavingsDisplay').innerText = formatMoney(Math.floor(budgetData.totalSavings));
-    document.getElementById('dailyLimitDisplay').innerText = formatMoney(Math.floor(budgetData.wallet)) + ' Kč';
+    
+    // Zobrazení dnešního limitu (včetně barvení do červena, pokud jsi v mínusu)
+    const limitDisplay = document.getElementById('dailyLimitDisplay');
+    const walletVal = Math.floor(budgetData.wallet);
+    limitDisplay.innerText = formatMoney(walletVal) + ' Kč';
+    
+    if (walletVal < 0) {
+        limitDisplay.style.color = 'var(--danger)';
+    } else {
+        limitDisplay.style.color = 'var(--primary)';
+    }
 
+    // Zbývá celkově
     const remainingTotal = budgetData.wallet + budgetData.monthPool;
     document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.floor(remainingTotal)) + ' Kč';
 
+    // Výpočet dnů
     const today = new Date();
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
     const daysLeft = daysInMonth - today.getDate() + 1;
     document.getElementById('daysLeftDisplay').innerText = daysLeft;
+    
+    // NOVÉ: Výpočet "Na další dny"
+    let nextDaysAvg = 0;
+    if (daysLeft > 0) {
+        nextDaysAvg = remainingTotal / daysLeft;
+    }
+    document.getElementById('nextDaysDisplay').innerText = '(cca ' + formatMoney(Math.floor(nextDaysAvg)) + ' Kč / den)';
 
     renderExpenseList();
 }
@@ -213,7 +233,6 @@ function formatMoney(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
-// OPRAVENO: Už nespoléhá na smyčku, ale pro první den spočítá podíl natvrdo
 function saveIncome() {
     const val = parseFloat(document.getElementById('incomeInput').value);
     if (val > 0) {
@@ -234,6 +253,7 @@ function saveIncome() {
     }
 }
 
+// ZMĚNA: Limit nyní padá přirozeně do mínusu, už ho nezastavujeme na nule!
 function addQuickExpense(description, manualAmount = null, manualDate = null) {
     const amountInput = document.getElementById('quickAmount');
     const amount = manualAmount || parseFloat(amountInput.value);
@@ -252,11 +272,6 @@ function addQuickExpense(description, manualAmount = null, manualDate = null) {
     });
 
     budgetData.wallet -= amount;
-    
-    if (budgetData.wallet < 0) {
-        budgetData.monthPool += budgetData.wallet; 
-        budgetData.wallet = 0;
-    }
 
     amountInput.value = '';
     saveData();
@@ -275,16 +290,23 @@ function deleteExpense(id) {
     }
 }
 
-function openCustomModal() {
+function openCustomModal(presetDesc = '') {
     const amount = document.getElementById('quickAmount').value;
     if(!amount) {
         alert("Nejdřív napiš částku nahoře!");
         return;
     }
-    document.getElementById('customDate').valueAsDate = new Date();
-    document.getElementById('customDesc').value = '';
+    
+    document.getElementById('customDate').value = getDateString(new Date());
+    document.getElementById('customDesc').value = presetDesc;
+    
     document.getElementById('customModal').style.display = 'flex';
-    document.getElementById('customDesc').focus();
+    
+    if (presetDesc) {
+        document.getElementById('customDate').focus();
+    } else {
+        document.getElementById('customDesc').focus();
+    }
 }
 
 function closeCustomModal() {
@@ -335,9 +357,62 @@ function executeManage(actionType) {
     closeManageModal();
 }
 
+function openSavingsModal() {
+    document.getElementById('modalCurrentSavings').innerText = formatMoney(Math.floor(budgetData.totalSavings)) + ' Kč';
+    document.getElementById('savingsManageInput').value = '';
+    document.getElementById('savingsModal').style.display = 'flex';
+}
+
+function closeSavingsModal() {
+    document.getElementById('savingsModal').style.display = 'none';
+}
+
+function addDirectToSavings() {
+    const amount = parseFloat(document.getElementById('savingsManageInput').value);
+    const totalRemaining = budgetData.wallet + budgetData.monthPool;
+
+    if (amount && amount > 0) {
+        if (amount > totalRemaining) {
+            alert('Tolik peněz ve svém aktuálním rozpočtu na tento měsíc nemáš.');
+            return;
+        }
+        
+        budgetData.totalSavings += amount;
+
+        if (amount <= budgetData.monthPool) {
+            budgetData.monthPool -= amount;
+        } else {
+            const remainder = amount - budgetData.monthPool;
+            budgetData.monthPool = 0;
+            budgetData.wallet -= remainder;
+        }
+
+        saveData();
+        updateUI();
+        closeSavingsModal();
+    }
+}
+
+function withdrawDirectFromSavings() {
+    const amount = parseFloat(document.getElementById('savingsManageInput').value);
+
+    if (amount && amount > 0) {
+        if (amount > budgetData.totalSavings) {
+            alert('Tolik peněz v úsporách nemáš.');
+            return;
+        }
+        
+        budgetData.totalSavings -= amount;
+        budgetData.monthPool += amount; 
+        
+        saveData();
+        updateUI();
+        closeSavingsModal();
+    }
+}
+
 function openSettingsModal() {
     document.getElementById('editIncomeInput').value = budgetData.income;
-    document.getElementById('withdrawSavingsInput').value = '';
     document.getElementById('settingsModal').style.display = 'flex';
 }
 
@@ -358,25 +433,6 @@ function saveEditedIncome() {
     }
 }
 
-function withdrawFromSavings() {
-    const amount = parseFloat(document.getElementById('withdrawSavingsInput').value);
-    if (amount && amount > 0) {
-        if (amount > budgetData.totalSavings) {
-            alert('Tolik peněz v úsporách nemáš.');
-            return;
-        }
-        
-        budgetData.totalSavings -= amount;
-        budgetData.monthPool += amount; 
-        
-        saveData();
-        updateUI();
-        document.getElementById('withdrawSavingsInput').value = '';
-        alert(`Částka ${amount} Kč byla vrácena z úspor do rozpočtu.`);
-    }
-}
-
-// NOVÉ: Ultimátní nástroj pro srovnání peněz
 function forceRecalculate() {
     const totalRemaining = budgetData.wallet + budgetData.monthPool;
     const today = new Date();
@@ -386,13 +442,26 @@ function forceRecalculate() {
     if (daysLeft > 0) {
         budgetData.wallet = totalRemaining / daysLeft;
         budgetData.monthPool = totalRemaining - budgetData.wallet;
-        budgetData.lastProcessedDate = getDateString(today); // Vyresetuje se smyčka pro další dny
+        budgetData.lastProcessedDate = getDateString(today);
         
         saveData();
         updateUI();
         alert('Rozpočet byl srovnán a spravedlivě rozpočítán na všechny zbývající dny.');
     }
     closeSettingsModal();
+}
+
+function hardResetApp() {
+    const overeni = prompt("⚠️ TOTO SMAŽE ÚPLNĚ VŠECHNA DATA!\n\nPokud opravdu chceš aplikaci vyresetovat a přijít o historii, napiš do pole níže slovo:\nSMAZAT");
+    
+    if (overeni === "SMAZAT") {
+        localStorage.removeItem('myBudgetApp');
+        localStorage.removeItem('myBudgetApp_v2');
+        localStorage.removeItem('myBudgetApp_v3');
+        location.reload();
+    } else if (overeni !== null) {
+        alert("Zadán špatný text. Bezpečnostní pojistka smazání zrušila. Tvá data jsou v bezpečí.");
+    }
 }
 
 initApp();
