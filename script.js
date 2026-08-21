@@ -387,6 +387,18 @@ function addDirectToSavings() {
             budgetData.wallet -= remainder;
         }
 
+        // NOVÉ: Okamžitý přepočet zbývajících peněz do dnů včetně dneška
+        const totalRemainingAfter = budgetData.wallet + budgetData.monthPool;
+        const today = new Date();
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const daysLeft = daysInMonth - today.getDate() + 1;
+        
+        if (daysLeft > 0) {
+            budgetData.wallet = totalRemainingAfter / daysLeft;
+            budgetData.monthPool = totalRemainingAfter - budgetData.wallet;
+            budgetData.lastProcessedDate = getDateString(today);
+        }
+
         saveData();
         updateUI();
         closeSavingsModal();
@@ -403,7 +415,19 @@ function withdrawDirectFromSavings() {
         }
         
         budgetData.totalSavings -= amount;
-        budgetData.monthPool += amount; 
+        budgetData.monthPool += amount; // Přidá peníze zpět do oběhu
+        
+        // NOVÉ: Okamžitý přepočet do zbývajících dnů včetně dneška i po vrácení z úspor
+        const totalRemainingAfter = budgetData.wallet + budgetData.monthPool;
+        const today = new Date();
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const daysLeft = daysInMonth - today.getDate() + 1;
+        
+        if (daysLeft > 0) {
+            budgetData.wallet = totalRemainingAfter / daysLeft;
+            budgetData.monthPool = totalRemainingAfter - budgetData.wallet;
+            budgetData.lastProcessedDate = getDateString(today);
+        }
         
         saveData();
         updateUI();
