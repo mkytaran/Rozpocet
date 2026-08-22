@@ -1,17 +1,26 @@
+// --- PŘEPÍNÁNÍ MOTIVU (Světlý/Tmavý včetně navigačního proužku) ---
 function initTheme() {
     const themeBtn = document.getElementById('themeToggleBtn');
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    
+    // Pokud meta značka v HTML náhodou chybí, vytvoříme ji dynamicky
+    if (!metaThemeColor) {
+        metaThemeColor = document.createElement('meta');
+        metaThemeColor.name = 'theme-color';
+        document.head.appendChild(metaThemeColor);
+    }
+
     const savedTheme = localStorage.getItem('budgetTheme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
     if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
         document.documentElement.setAttribute('data-theme', 'dark');
         if (themeBtn) themeBtn.textContent = '☀️';
-        if (metaThemeColor) metaThemeColor.setAttribute('content', '#0f172a');
+        metaThemeColor.setAttribute('content', '#0f172a'); // Barva pozadí tmavého režimu
     } else {
         document.documentElement.setAttribute('data-theme', 'light');
         if (themeBtn) themeBtn.textContent = '🌙';
-        if (metaThemeColor) metaThemeColor.setAttribute('content', '#f8fafc');
+        metaThemeColor.setAttribute('content', '#f8fafc'); // Barva pozadí světlého režimu
     }
 }
 
@@ -24,12 +33,12 @@ function toggleTheme() {
         root.setAttribute('data-theme', 'light');
         localStorage.setItem('budgetTheme', 'light');
         themeBtn.textContent = '🌙';
-        metaThemeColor.setAttribute('content', '#f8fafc');
+        if (metaThemeColor) metaThemeColor.setAttribute('content', '#f8fafc'); // Světlé pozadí
     } else {
         root.setAttribute('data-theme', 'dark');
         localStorage.setItem('budgetTheme', 'dark');
         themeBtn.textContent = '☀️';
-        metaThemeColor.setAttribute('content', '#0f172a');
+        if (metaThemeColor) metaThemeColor.setAttribute('content', '#0f172a'); // Tmavé pozadí
     }
 }
 
