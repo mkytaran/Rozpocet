@@ -2,20 +2,17 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
+    <!-- TOTO JE KLÍČOVÉ: viewport-fit=cover říká prohlížeči, ať ignoruje bezpečné zóny a roztáhne to až k okrajům -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <!-- Tyto dvě značky řeší barvu lišt mnohem agresivněji než JS -->
+    
+    <meta name="color-scheme" content="light dark">
+    
+    <!-- Vrátíme zpět tyto meta barvy, aby měly vliv na horní lištu -->
     <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-    <meta name="color-scheme" content="light dark">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Odkaz na čistý soubor pro Android a Chrome -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
-    
-    <!-- Odkaz na specifickou ikonu pro iOS (iPhone si ji zaoblí sám) -->
     <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2334d399'/%3E%3Cstop offset='100%25' stop-color='%23059669'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23g)'/%3E%3Cpath fill-rule='evenodd' d='M80,30 H20 c-5.5,0-10,4.5-10,10 v20 c0,5.5,4.5,10,10,10 h60 c5.5,0,10-4.5,10-10 V40 C90,34.5,85.5,30,80,30 z M82,56 H65 c-3.3,0-6-2.7-6-6 s2.7-6,6-6 h17 V56 z' fill='%23ffffff'/%3E%3Ccircle cx='72' cy='50' r='2.5' fill='%23059669'/%3E%3C/svg%3E">
     
     <title>Rozpočet</title>
