@@ -1,8 +1,7 @@
 {
   "name": "Rozpočet",
   "short_name": "Rozpočet",
-  "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
+  "display": "fullscreen",
   "start_url": "./index.html",
   "background_color": "#f8fafc",
   "theme_color": "#10b981",
