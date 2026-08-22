@@ -3,13 +3,6 @@ function initTheme() {
     const themeBtn = document.getElementById('themeToggleBtn');
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     
-    // Pokud meta značka v HTML náhodou chybí, vytvoříme ji dynamicky
-    if (!metaThemeColor) {
-        metaThemeColor = document.createElement('meta');
-        metaThemeColor.name = 'theme-color';
-        document.head.appendChild(metaThemeColor);
-    }
-
     const savedTheme = localStorage.getItem('budgetTheme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     

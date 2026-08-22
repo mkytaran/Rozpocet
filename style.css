@@ -32,7 +32,11 @@ html, body {
 body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     color: var(--text-color);
-    padding: calc(15px + env(safe-area-inset-top)) 15px calc(40px + env(safe-area-inset-bottom)) 15px;
+    /* NOVÉ: Zajišťuje, že obsah nepodleze pod gesture bar na Androidu/iOS */
+    padding-top: calc(15px + env(safe-area-inset-top));
+    padding-bottom: calc(40px + env(safe-area-inset-bottom));
+    padding-left: calc(15px + env(safe-area-inset-left));
+    padding-right: calc(15px + env(safe-area-inset-right));
     touch-action: manipulation;
     display: flex;
     flex-direction: column;
