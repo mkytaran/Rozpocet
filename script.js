@@ -1,15 +1,41 @@
-// --- PŘEPÍNÁNÍ MOTIVU (Světlý/Tmavý) ---
+// --- PŘEPÍNÁNÍ MOTIVU (Světlý/Tmavý + systémový motiv) ---
+
+function updateThemeColor() {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const theme = document.documentElement.getAttribute('data-theme');
+    if (!meta) return;
+
+    if (theme === 'dark') {
+        meta.setAttribute('content', '#0f172a');
+    } else {
+        meta.setAttribute('content', '#f8fafc');
+    }
+}
+
+function applySystemTheme() {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (prefersDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+
+    updateThemeColor();
+}
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
+
 function initTheme() {
     const themeBtn = document.getElementById('themeToggleBtn');
     const savedTheme = localStorage.getItem('budgetTheme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        if (themeBtn) themeBtn.textContent = '☀️';
+
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
     } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        if (themeBtn) themeBtn.textContent = '🌙';
+        applySystemTheme();
+        themeBtn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
     }
 
     updateThemeColor();
@@ -18,7 +44,7 @@ function initTheme() {
 function toggleTheme() {
     const root = document.documentElement;
     const themeBtn = document.getElementById('themeToggleBtn');
-    
+
     if (root.getAttribute('data-theme') === 'dark') {
         root.setAttribute('data-theme', 'light');
         localStorage.setItem('budgetTheme', 'light');
@@ -32,26 +58,12 @@ function toggleTheme() {
     updateThemeColor();
 }
 
-// --- Dynamická změna barvy gesture baru ---
-function updateThemeColor() {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    const theme = document.documentElement.getAttribute('data-theme');
-
-    if (!meta) return;
-
-    if (theme === 'dark') {
-        meta.setAttribute('content', '#0f172a'); // tmavý motiv
-    } else {
-        meta.setAttribute('content', '#f8fafc'); // světlý motiv
-    }
-}
-
 initTheme();
 
+// --- Pomocné funkce ---
 function getDateString(d) {
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
-
 let budgetData = JSON.parse(localStorage.getItem('myBudgetApp_v3'));
 
 if (!budgetData) {
@@ -133,10 +145,8 @@ function handleLeftover(action) {
     } else if (action === 'usporit') {
         budgetData.totalSavings += leftover;
         budgetData.wallet = 0;
-    } else if (action === 'dnesek') {
-        // Zůstane ve wallet
     }
-    
+
     document.getElementById('dailyActionModal').style.display = 'none';
     processDailyAllowance();
 }
@@ -174,8 +184,6 @@ function processDailyAllowance() {
 function saveData() {
     localStorage.setItem('myBudgetApp_v3', JSON.stringify(budgetData));
 }
-
-// --- VYKRESLOVÁNÍ OBRAZOVKY ---
 function updateUI() {
     document.getElementById('totalSavingsDisplay').innerText = formatMoney(Math.floor(budgetData.totalSavings));
     
@@ -183,11 +191,7 @@ function updateUI() {
     const walletVal = Math.floor(budgetData.wallet);
     limitDisplay.innerText = formatMoney(walletVal) + ' Kč';
     
-    if (walletVal < 0) {
-        limitDisplay.style.color = 'var(--danger)';
-    } else {
-        limitDisplay.style.color = 'var(--primary)';
-    }
+    limitDisplay.style.color = walletVal < 0 ? 'var(--danger)' : 'var(--primary)';
 
     const remainingTotal = budgetData.wallet + budgetData.monthPool;
     document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.floor(remainingTotal)) + ' Kč';
@@ -197,10 +201,7 @@ function updateUI() {
     const daysLeft = daysInMonth - today.getDate() + 1;
     document.getElementById('daysLeftDisplay').innerText = daysLeft;
     
-    let nextDaysAvg = 0;
-    if (daysLeft > 0) {
-        nextDaysAvg = remainingTotal / daysLeft;
-    }
+    let nextDaysAvg = daysLeft > 0 ? remainingTotal / daysLeft : 0;
     document.getElementById('nextDaysDisplay').innerText = '(cca ' + formatMoney(Math.floor(nextDaysAvg)) + ' Kč / den)';
 
     renderExpenseList();
@@ -262,7 +263,6 @@ function saveIncome() {
     }
 }
 
-// Limit může jít do mínusu
 function addQuickExpense(description, manualAmount = null, manualDate = null) {
     const amountInput = document.getElementById('quickAmount');
     const amount = manualAmount || parseFloat(amountInput.value);
