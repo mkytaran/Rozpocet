@@ -11,7 +11,10 @@ function initTheme() {
         document.documentElement.setAttribute('data-theme', 'light');
         if (themeBtn) themeBtn.textContent = '🌙';
     }
+
+    updateThemeColor(); // ← DŮLEŽITÉ 23.8.
 }
+
 
 function toggleTheme() {
     const root = document.documentElement;
@@ -25,6 +28,22 @@ function toggleTheme() {
         root.setAttribute('data-theme', 'dark');
         localStorage.setItem('budgetTheme', 'dark');
         themeBtn.textContent = '☀️';
+    }
+
+    updateThemeColor(); // ← DŮLEŽITÉ
+}
+
+// --- NOVÉ: Dynamická změna barvy gesture baru ---
+function updateThemeColor() {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const theme = document.documentElement.getAttribute('data-theme');
+
+    if (!meta) return;
+
+    if (theme === 'dark') {
+        meta.setAttribute('content', '#0f172a'); // tmavý motiv
+    } else {
+        meta.setAttribute('content', '#f8fafc'); // světlý motiv
     }
 }
 
@@ -161,7 +180,6 @@ function saveData() {
 function updateUI() {
     document.getElementById('totalSavingsDisplay').innerText = formatMoney(Math.floor(budgetData.totalSavings));
     
-    // Zobrazení dnešního limitu (včetně barvení do červena, pokud jsi v mínusu)
     const limitDisplay = document.getElementById('dailyLimitDisplay');
     const walletVal = Math.floor(budgetData.wallet);
     limitDisplay.innerText = formatMoney(walletVal) + ' Kč';
@@ -172,17 +190,14 @@ function updateUI() {
         limitDisplay.style.color = 'var(--primary)';
     }
 
-    // Zbývá celkově
     const remainingTotal = budgetData.wallet + budgetData.monthPool;
     document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.floor(remainingTotal)) + ' Kč';
 
-    // Výpočet dnů
     const today = new Date();
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
     const daysLeft = daysInMonth - today.getDate() + 1;
     document.getElementById('daysLeftDisplay').innerText = daysLeft;
     
-    // NOVÉ: Výpočet "Na další dny"
     let nextDaysAvg = 0;
     if (daysLeft > 0) {
         nextDaysAvg = remainingTotal / daysLeft;
@@ -242,13 +257,12 @@ function saveIncome() {
         budgetData.monthPool = val - allowance;
         budgetData.lastProcessedDate = getDateString(today);
         
-        document.getElementById('incomeModal').style.display = 'none';
+        document.getElementById('incomeModal').style.display = 'flex';
         saveData();
         updateUI();
     }
 }
 
-// ZMĚNA: Limit nyní padá přirozeně do mínusu, už ho nezastavujeme na nule!
 function addQuickExpense(description, manualAmount = null, manualDate = null) {
     const amountInput = document.getElementById('quickAmount');
     const amount = manualAmount || parseFloat(amountInput.value);
@@ -382,7 +396,6 @@ function addDirectToSavings() {
             budgetData.wallet -= remainder;
         }
 
-        // NOVÉ: Okamžitý přepočet zbývajících peněz do dnů včetně dneška
         const totalRemainingAfter = budgetData.wallet + budgetData.monthPool;
         const today = new Date();
         const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
@@ -410,9 +423,8 @@ function withdrawDirectFromSavings() {
         }
         
         budgetData.totalSavings -= amount;
-        budgetData.monthPool += amount; // Přidá peníze zpět do oběhu
+        budgetData.monthPool += amount;
         
-        // NOVÉ: Okamžitý přepočet do zbývajících dnů včetně dneška i po vrácení z úspor
         const totalRemainingAfter = budgetData.wallet + budgetData.monthPool;
         const today = new Date();
         const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
@@ -473,14 +485,4 @@ function forceRecalculate() {
 function hardResetApp() {
     const overeni = prompt("⚠️ TOTO SMAŽE ÚPLNĚ VŠECHNA DATA!\n\nPokud opravdu chceš aplikaci vyresetovat a přijít o historii, napiš do pole níže slovo:\nSMAZAT");
     
-    if (overeni === "SMAZAT") {
-        localStorage.removeItem('myBudgetApp');
-        localStorage.removeItem('myBudgetApp_v2');
-        localStorage.removeItem('myBudgetApp_v3');
-        location.reload();
-    } else if (overeni !== null) {
-        alert("Zadán špatný text. Bezpečnostní pojistka smazání zrušila. Tvá data jsou v bezpečí.");
-    }
-}
-
-initApp();
+    if (overeni === "SMAZAT")

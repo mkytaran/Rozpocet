@@ -4,7 +4,8 @@
   "display": "standalone",
   "start_url": "./index.html",
   "background_color": "#f8fafc",
-  "theme_color": "#10b981",
+ // KVŮLI PŘEPÍNÁNÍ TÉMATU "theme_color": "#10b981",
+  "theme_color": "transparent",
   "icons": [
     {
       "src": "icon.svg",
