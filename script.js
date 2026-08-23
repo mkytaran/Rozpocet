@@ -12,9 +12,8 @@ function initTheme() {
         if (themeBtn) themeBtn.textContent = '🌙';
     }
 
-    updateThemeColor(); // ← DŮLEŽITÉ 23.8.
+    updateThemeColor();
 }
-
 
 function toggleTheme() {
     const root = document.documentElement;
@@ -30,10 +29,10 @@ function toggleTheme() {
         themeBtn.textContent = '☀️';
     }
 
-    updateThemeColor(); // ← DŮLEŽITÉ
+    updateThemeColor();
 }
 
-// --- NOVÉ: Dynamická změna barvy gesture baru ---
+// --- Dynamická změna barvy gesture baru ---
 function updateThemeColor() {
     const meta = document.querySelector('meta[name="theme-color"]');
     const theme = document.documentElement.getAttribute('data-theme');
@@ -257,12 +256,13 @@ function saveIncome() {
         budgetData.monthPool = val - allowance;
         budgetData.lastProcessedDate = getDateString(today);
         
-        document.getElementById('incomeModal').style.display = 'flex';
+        document.getElementById('incomeModal').style.display = 'none';
         saveData();
         updateUI();
     }
 }
 
+// Limit může jít do mínusu
 function addQuickExpense(description, manualAmount = null, manualDate = null) {
     const amountInput = document.getElementById('quickAmount');
     const amount = manualAmount || parseFloat(amountInput.value);
@@ -485,4 +485,14 @@ function forceRecalculate() {
 function hardResetApp() {
     const overeni = prompt("⚠️ TOTO SMAŽE ÚPLNĚ VŠECHNA DATA!\n\nPokud opravdu chceš aplikaci vyresetovat a přijít o historii, napiš do pole níže slovo:\nSMAZAT");
     
-    if (overeni === "SMAZAT")
+    if (overeni === "SMAZAT") {
+        localStorage.removeItem('myBudgetApp');
+        localStorage.removeItem('myBudgetApp_v2');
+        localStorage.removeItem('myBudgetApp_v3');
+        location.reload();
+    } else if (overeni !== null) {
+        alert("Zadán špatný text. Bezpečnostní pojistka smazání zrušila. Tvá data jsou v bezpečí.");
+    }
+}
+
+initApp();
