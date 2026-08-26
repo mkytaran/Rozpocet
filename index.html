@@ -88,26 +88,26 @@
         </div>
     </div>
 
-    <!-- Modál: Nastavení (nyní umí měnit i datum konce) -->
+    <!-- Modál: Nastavení (Pročištěné s jedním jasným tlačítkem) -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content">
             <h2>Nastavení</h2>
             
-            <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px;">Změnit rozpočet a konec období</h3>
+            <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px;">Změnit rozpočet nebo konec období</h3>
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
                 <div>
                     <label style="font-size: 0.85rem; color: var(--text-muted);">Příjem na celé období (Kč):</label>
                     <input type="number" id="editIncomeInput" inputmode="numeric" style="margin-bottom: 0;">
                 </div>
                 <div>
-                    <label style="font-size: 0.85rem; color: var(--text-muted);">Posunout datum konce:</label>
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Upravit datum konce:</label>
                     <input type="date" id="editEndDateInput" style="margin-bottom: 0;">
                 </div>
             </div>
             
-            <button class="btn" style="margin-bottom: 30px;" onclick="saveEditedSettings()">Uložit úpravy a přepočítat</button>
+            <!-- VŠE SPOJENO DO TOHOTO JEDNOHO TLAČÍTKA -->
+            <button class="btn" style="margin-bottom: 25px;" onclick="saveEditedSettings()">➗ Uložit a srovnat limity</button>
 
-            <button class="btn" style="background-color: var(--border-color); color: var(--text-color); margin-bottom: 15px;" onclick="forceRecalculate()">➗ Pouze srovnat denní limity</button>
             <button class="btn" style="background-color: var(--danger); color: white; margin-bottom: 25px;" onclick="hardResetApp()">⚠️ Vymazat data a začít znovu</button>
             <button class="btn" style="background-color: transparent; color: var(--text-muted); text-decoration: underline;" onclick="closeSettingsModal()">Zavřít</button>
         </div>

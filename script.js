@@ -43,14 +43,12 @@ function getDaysBetween(d1Str, d2Str) {
     return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
 }
 
-// Inicializace a migrace na v4 (vlastní kalendář)
 let budgetData = JSON.parse(localStorage.getItem('myBudgetApp_v4'));
 
 if (!budgetData) {
     const oldDataV3 = JSON.parse(localStorage.getItem('myBudgetApp_v3')); 
     
     if (oldDataV3 && oldDataV3.income > 0) {
-        // Převod starého formátu (měsíčního) na datumový (od-do)
         let parts = oldDataV3.monthId.split('-');
         let y = parseInt(parts[0]);
         let m = parseInt(parts[1]);
@@ -80,7 +78,6 @@ function initApp() {
     const today = new Date();
     const todayStr = getDateString(today);
 
-    // Konec starého období a převod zbytků do úspor
     if (budgetData.endDate && todayStr > budgetData.endDate) {
         budgetData.totalSavings += (Math.max(0, budgetData.wallet) + budgetData.monthPool);
         budgetData.income = 0;
@@ -96,7 +93,6 @@ function initApp() {
     if (budgetData.income === 0 || !budgetData.endDate) {
         document.getElementById('incomeModal').style.display = 'flex';
         
-        // Předvyplníme datumy: Začátek dnes, Konec za měsíc (mínus 1 den)
         document.getElementById('startDateInput').value = todayStr;
         let nextMonth = new Date();
         nextMonth.setMonth(nextMonth.getMonth() + 1);
@@ -178,7 +174,6 @@ function saveData() {
     localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData));
 }
 
-// --- VYKRESLOVÁNÍ OBRAZOVKY ---
 function updateUI() {
     document.getElementById('totalSavingsDisplay').innerText = formatMoney(Math.floor(budgetData.totalSavings));
     
@@ -274,7 +269,6 @@ function saveIncome() {
     budgetData.wallet = 0;
     budgetData.monthPool = val;
     
-    // Nastavíme lastProcessedDate na den před začátkem, aby procesor správně naskočil
     let startD = new Date(sDate);
     startD.setDate(startD.getDate() - 1);
     budgetData.lastProcessedDate = getDateString(startD);
@@ -471,31 +465,31 @@ function closeSettingsModal() {
     document.getElementById('settingsModal').style.display = 'none';
 }
 
-// ZMĚNA: Ukládá nově i úpravu koncového data v rámci aktuálního období
+// ZMĚNA: Vše sjednoceno do jedné robustní funkce. Uloží a natvrdo přepočítá.
 function saveEditedSettings() {
-    const newIncome = parseFloat(document.getElementById('editIncomeInput').value);
-    const newEndDate = document.getElementById('editEndDateInput').value;
+    const newIncomeInput = document.getElementById('editIncomeInput').value;
+    const newEndDateInput = document.getElementById('editEndDateInput').value;
     
-    if (newIncome && newIncome > 0 && newEndDate) {
-        
-        if (newEndDate < getDateString(new Date())) {
-            alert('Nové datum konce nemůže být v minulosti.');
-            return;
-        }
+    const newIncome = parseFloat(newIncomeInput);
+    const newEndDate = newEndDateInput;
 
-        const difference = newIncome - budgetData.income;
-        budgetData.income = newIncome;
-        budgetData.monthPool += difference; 
-        
-        budgetData.endDate = newEndDate;
-        
-        saveData();
-        forceRecalculate(); 
-        alert('Nastavení úspěšně uloženo a rozpočet přepočítán na nový počet dnů.');
+    if (!newIncome || newIncome <= 0 || !newEndDate) {
+        alert('Vyplň prosím správně příjem i datum konce.');
+        return;
     }
-}
 
-function forceRecalculate() {
+    if (newEndDate < getDateString(new Date())) {
+        alert('Nové datum konce nemůže být v minulosti.');
+        return;
+    }
+
+    // Aplikace změn příjmu a data
+    const difference = newIncome - budgetData.income;
+    budgetData.income = newIncome;
+    budgetData.monthPool += difference; 
+    budgetData.endDate = newEndDate;
+    
+    // Okamžitý matematický přepočet podle nových dnů
     const totalRemaining = budgetData.wallet + budgetData.monthPool;
     const today = new Date();
     const daysLeft = getDaysBetween(getDateString(today), budgetData.endDate) + 1;
@@ -504,11 +498,13 @@ function forceRecalculate() {
         budgetData.wallet = totalRemaining / daysLeft;
         budgetData.monthPool = totalRemaining - budgetData.wallet;
         budgetData.lastProcessedDate = getDateString(today);
-        
-        saveData();
-        updateUI();
     }
+    
+    saveData();
+    updateUI();
     closeSettingsModal();
+    
+    alert('Nastavení uloženo. Zbývající peníze byly přepočítány na ' + daysLeft + ' dnů.');
 }
 
 function hardResetApp() {
