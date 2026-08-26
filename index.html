@@ -2,18 +2,16 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <!-- TOTO JE KLÍČOVÉ: viewport-fit=cover říká prohlížeči, ať ignoruje bezpečné zóny a roztáhne to až k okrajům -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <meta name="color-scheme" content="light dark">
-    
-    <!-- ZRUŠENO KVŮLI PŘEPÍNÁNÍ TÉMATU 
-     <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-    -->
-    <!-- PŘIDÁNO KVŮLI PŘEPÍNÁNÍ TÉMATU -->
-    <meta name="theme-color" content="#f8fafc">
-
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2334d399'/%3E%3Cstop offset='100%25' stop-color='%23059669'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23g)'/%3E%3Cpath fill-rule='evenodd' d='M80,30 H20 c-5.5,0-10,4.5-10,10 v20 c0,5.5,4.5,10,10,10 h60 c5.5,0,10-4.5,10-10 V40 C90,34.5,85.5,30,80,30 z M82,56 H65 c-3.3,0-6-2.7-6-6 s2.7-6,6-6 h17 V56 z' fill='%23ffffff'/%3E%3Ccircle cx='72' cy='50' r='2.5' fill='%23059669'/%3E%3C/svg%3E">
@@ -42,12 +40,15 @@
         
         <div class="hero-sub">
             <div>
-                Zbývá peněz
+                Zbývá
                 <span id="remainingMonthDisplay">0 Kč</span>
-                <small id="nextDaysDisplay">(0 Kč / den)</small>
             </div>
             <div>
-                Dní do konce
+                Na den
+                <span id="nextDaysDisplay">0 Kč</span>
+            </div>
+            <div>
+                Dní
                 <span id="daysLeftDisplay">0</span>
             </div>
         </div>
@@ -69,7 +70,7 @@
     </div>
 
     <div class="hero-card" style="padding: 15px 20px;">
-        <div class="hero-label" style="margin-bottom: 15px; text-align: left;">Tento měsíc</div>
+        <div class="hero-label" style="margin-bottom: 15px; text-align: left;">Výdaje v aktuálním období</div>
         <ul class="expense-list" id="expenseList"></ul>
     </div>
 
@@ -80,43 +81,59 @@
             <p style="color: var(--text-muted); margin-bottom: 20px;">
                 Aktuálně máš naspořeno <strong id="modalCurrentSavings" style="color: var(--primary);">0 Kč</strong>.
             </p>
-
             <input type="number" id="savingsManageInput" inputmode="numeric" placeholder="Zadej částku (Kč)" style="text-align: center; font-weight: bold; font-size: 1.5rem; margin-bottom: 20px;">
-
             <button class="btn" style="margin-bottom: 10px;" onclick="addDirectToSavings()">⬇️ Přesunout z rozpočtu do úspor</button>
             <button class="btn" style="margin-bottom: 20px; background-color: var(--border-color); color: var(--text-color);" onclick="withdrawDirectFromSavings()">⬆️ Vrátit z úspor do rozpočtu</button>
-
             <button class="btn" style="background-color: transparent; color: var(--text-muted); text-decoration: underline;" onclick="closeSavingsModal()">Zavřít</button>
         </div>
     </div>
 
-    <!-- Modál: Nastavení -->
+    <!-- Modál: Nastavení (nyní umí měnit i datum konce) -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content">
             <h2>Nastavení</h2>
             
-            <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px;">Změnit rozpočet na tento měsíc</h3>
-            <div style="display: flex; gap: 10px; margin-bottom: 30px;">
-                <input type="number" id="editIncomeInput" inputmode="numeric" style="margin-bottom: 0; flex-grow: 1;">
-                <button class="btn" style="width: auto; padding: 0 20px;" onclick="saveEditedIncome()">Uložit</button>
+            <h3 style="font-size: 1rem; margin-top: 20px; margin-bottom: 10px;">Změnit rozpočet a konec období</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Příjem na celé období (Kč):</label>
+                    <input type="number" id="editIncomeInput" inputmode="numeric" style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Posunout datum konce:</label>
+                    <input type="date" id="editEndDateInput" style="margin-bottom: 0;">
+                </div>
             </div>
-
-            <!-- Tlačítka pro správu dat -->
-            <button class="btn" style="background-color: var(--border-color); color: var(--text-color); margin-bottom: 15px;" onclick="forceRecalculate()">➗ Přepočítat a srovnat limity</button>
             
-            <button class="btn" style="background-color: var(--danger); color: white; margin-bottom: 25px;" onclick="hardResetApp()">⚠️ Vymazat data a začít znovu</button>
+            <button class="btn" style="margin-bottom: 30px;" onclick="saveEditedSettings()">Uložit úpravy a přepočítat</button>
 
+            <button class="btn" style="background-color: var(--border-color); color: var(--text-color); margin-bottom: 15px;" onclick="forceRecalculate()">➗ Pouze srovnat denní limity</button>
+            <button class="btn" style="background-color: var(--danger); color: white; margin-bottom: 25px;" onclick="hardResetApp()">⚠️ Vymazat data a začít znovu</button>
             <button class="btn" style="background-color: transparent; color: var(--text-muted); text-decoration: underline;" onclick="closeSettingsModal()">Zavřít</button>
         </div>
     </div>
 
-    <!-- Modál: Nový měsíc -->
+    <!-- Modál: Nový měsíc/Období -->
     <div class="modal-overlay" id="incomeModal">
         <div class="modal-content">
-            <h2>Nový měsíc! 💸</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Zadej svůj rozpočet (příjem) na aktuální měsíc. Předchozí zůstatek byl přesunut do úspor.</p>
-            <input type="number" id="incomeInput" placeholder="Zadej částku (Kč)" inputmode="numeric">
-            <button class="btn" onclick="saveIncome()">Uložit a začít měsíc</button>
+            <h2>Nové období! 💸</h2>
+            <p style="color: var(--text-muted); margin-bottom: 15px;">Nastav si svůj rozpočet a datum, od kdy do kdy ti má vydržet. (Předchozí zůstatky šly do úspor).</p>
+            
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Zadej rozpočet (Kč):</label>
+            <input type="number" id="incomeInput" placeholder="Např. 15000" inputmode="numeric" style="margin-bottom: 15px;">
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Začátek:</label>
+                    <input type="date" id="startDateInput" style="margin-bottom: 0; padding: 10px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Konec:</label>
+                    <input type="date" id="endDateInput" style="margin-bottom: 0; padding: 10px;">
+                </div>
+            </div>
+            
+            <button class="btn" onclick="saveIncome()">Začít období</button>
         </div>
     </div>
 
@@ -128,8 +145,7 @@
                 Za minulé dny ti v limitu zbylo <strong id="leftoverAmountDisplay" style="color: var(--primary); font-size: 1.2rem;">0 Kč</strong>.<br>
                 Co chceš s těmito penězi udělat?
             </p>
-            <button class="btn" style="margin-bottom: 10px;" onclick="handleLeftover('dnesek')">⬇️ Přidat k dnešnímu dni</button>
-            <button class="btn" style="margin-bottom: 10px; background-color: var(--border-color); color: var(--text-color);" onclick="handleLeftover('rozpocitat')">➗ Rozpočítat do dalších dní</button>
+            <button class="btn" style="margin-bottom: 10px;" onclick="handleLeftover('rozpocitat')">➗ Rozpočítat do dalších dní</button>
             <button class="btn" style="background-color: transparent; color: var(--text-color); border: 1px solid var(--border-color);" onclick="handleLeftover('usporit')">💰 Uspořit</button>
         </div>
     </div>

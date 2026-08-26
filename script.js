@@ -1,50 +1,22 @@
-// --- PŘEPÍNÁNÍ MOTIVU (Světlý/Tmavý + systémový motiv) ---
-
-function updateThemeColor() {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    const theme = document.documentElement.getAttribute('data-theme');
-    if (!meta) return;
-
-    if (theme === 'dark') {
-        meta.setAttribute('content', '#0f172a');
-    } else {
-        meta.setAttribute('content', '#f8fafc');
-    }
-}
-
-function applySystemTheme() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (prefersDark) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-    }
-
-    updateThemeColor();
-}
-
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
-
+// --- PŘEPÍNÁNÍ MOTIVU ---
 function initTheme() {
     const themeBtn = document.getElementById('themeToggleBtn');
     const savedTheme = localStorage.getItem('budgetTheme');
-
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        if (themeBtn) themeBtn.textContent = '☀️';
     } else {
-        applySystemTheme();
-        themeBtn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+        document.documentElement.setAttribute('data-theme', 'light');
+        if (themeBtn) themeBtn.textContent = '🌙';
     }
-
-    updateThemeColor();
 }
 
 function toggleTheme() {
     const root = document.documentElement;
     const themeBtn = document.getElementById('themeToggleBtn');
-
+    
     if (root.getAttribute('data-theme') === 'dark') {
         root.setAttribute('data-theme', 'light');
         localStorage.setItem('budgetTheme', 'light');
@@ -54,71 +26,83 @@ function toggleTheme() {
         localStorage.setItem('budgetTheme', 'dark');
         themeBtn.textContent = '☀️';
     }
-
-    updateThemeColor();
 }
 
 initTheme();
 
-// --- Pomocné funkce ---
+// Pomocné funkce pro práci s datem
 function getDateString(d) {
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
-let budgetData = JSON.parse(localStorage.getItem('myBudgetApp_v3'));
+
+function getDaysBetween(d1Str, d2Str) {
+    const d1 = new Date(d1Str);
+    const d2 = new Date(d2Str);
+    d1.setHours(0,0,0,0);
+    d2.setHours(0,0,0,0);
+    return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+}
+
+// Inicializace a migrace na v4 (vlastní kalendář)
+let budgetData = JSON.parse(localStorage.getItem('myBudgetApp_v4'));
 
 if (!budgetData) {
-    const oldDataV1 = JSON.parse(localStorage.getItem('myBudgetApp')); 
+    const oldDataV3 = JSON.parse(localStorage.getItem('myBudgetApp_v3')); 
     
-    if (oldDataV1 && oldDataV1.income > 0) {
-        const totalExpenses = oldDataV1.expenses.reduce((sum, item) => sum + item.amount, 0);
-        const remaining = oldDataV1.income - totalExpenses;
-        
-        let yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        
+    if (oldDataV3 && oldDataV3.income > 0) {
+        // Převod starého formátu (měsíčního) na datumový (od-do)
+        let parts = oldDataV3.monthId.split('-');
+        let y = parseInt(parts[0]);
+        let m = parseInt(parts[1]);
+        let lastDay = new Date(y, m, 0); 
+        let firstDayStr = oldDataV3.monthId + '-01';
+
         budgetData = {
-            monthId: oldDataV1.monthId,
-            income: oldDataV1.income,
-            wallet: 0, 
-            monthPool: remaining > 0 ? remaining : 0, 
-            totalSavings: oldDataV1.totalSavings || 0,
-            lastProcessedDate: getDateString(yesterday), 
-            expenses: oldDataV1.expenses
+            startDate: firstDayStr,
+            endDate: getDateString(lastDay),
+            income: oldDataV3.income,
+            wallet: oldDataV3.wallet,
+            monthPool: oldDataV3.monthPool,
+            totalSavings: oldDataV3.totalSavings || 0,
+            lastProcessedDate: oldDataV3.lastProcessedDate,
+            expenses: oldDataV3.expenses || []
         };
-        localStorage.setItem('myBudgetApp_v3', JSON.stringify(budgetData));
     } else {
         budgetData = {
-            monthId: '', income: 0, wallet: 0, monthPool: 0,
+            startDate: '', endDate: '', income: 0, wallet: 0, monthPool: 0,
             totalSavings: 0, lastProcessedDate: '', expenses: []
         };
     }
+    localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData));
 }
 
 function initApp() {
     const today = new Date();
-    const currentMonthId = `${today.getFullYear()}-${today.getMonth() + 1}`;
     const todayStr = getDateString(today);
 
-    if (budgetData.monthId !== currentMonthId) {
-        if (budgetData.monthId !== '') {
-            budgetData.totalSavings += (budgetData.wallet + budgetData.monthPool);
-        }
-        
-        budgetData.monthId = currentMonthId;
+    // Konec starého období a převod zbytků do úspor
+    if (budgetData.endDate && todayStr > budgetData.endDate) {
+        budgetData.totalSavings += (Math.max(0, budgetData.wallet) + budgetData.monthPool);
         budgetData.income = 0;
         budgetData.wallet = 0;
         budgetData.monthPool = 0;
         budgetData.expenses = [];
-        
-        let yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        budgetData.lastProcessedDate = getDateString(yesterday);
-        
+        budgetData.startDate = '';
+        budgetData.endDate = '';
+        budgetData.lastProcessedDate = '';
         saveData();
     }
 
-    if (budgetData.income === 0) {
+    if (budgetData.income === 0 || !budgetData.endDate) {
         document.getElementById('incomeModal').style.display = 'flex';
+        
+        // Předvyplníme datumy: Začátek dnes, Konec za měsíc (mínus 1 den)
+        document.getElementById('startDateInput').value = todayStr;
+        let nextMonth = new Date();
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        nextMonth.setDate(nextMonth.getDate() - 1);
+        document.getElementById('endDateInput').value = getDateString(nextMonth);
+        
         document.getElementById('incomeInput').focus();
         return;
     } 
@@ -146,7 +130,7 @@ function handleLeftover(action) {
         budgetData.totalSavings += leftover;
         budgetData.wallet = 0;
     }
-
+    
     document.getElementById('dailyActionModal').style.display = 'none';
     processDailyAllowance();
 }
@@ -154,19 +138,28 @@ function handleLeftover(action) {
 function processDailyAllowance() {
     if (!budgetData.lastProcessedDate) return;
 
-    let parts = budgetData.lastProcessedDate.split('-');
-    let lastDate = new Date(parts[0], parts[1]-1, parts[2]);
+    let lastDate = new Date(budgetData.lastProcessedDate);
     let today = new Date();
     today.setHours(0,0,0,0);
-    lastDate.setHours(0,0,0,0);
+    
+    let endDateObj = new Date(budgetData.endDate);
+    endDateObj.setHours(0,0,0,0);
 
     let changed = false;
+
+    if (lastDate < today && budgetData.wallet < 0) {
+        budgetData.monthPool += budgetData.wallet; 
+        budgetData.wallet = 0; 
+        changed = true;
+    }
     
     while(lastDate < today) {
         lastDate.setDate(lastDate.getDate() + 1);
-        let daysInMonth = new Date(lastDate.getFullYear(), lastDate.getMonth() + 1, 0).getDate();
-        let currentDay = lastDate.getDate();
-        let daysLeft = daysInMonth - currentDay + 1; 
+        
+        if (lastDate > endDateObj) break;
+
+        let currentStr = getDateString(lastDate);
+        let daysLeft = getDaysBetween(currentStr, budgetData.endDate) + 1;
 
         if (daysLeft > 0 && budgetData.monthPool > 0) {
             let allowance = budgetData.monthPool / daysLeft;
@@ -182,8 +175,10 @@ function processDailyAllowance() {
 }
 
 function saveData() {
-    localStorage.setItem('myBudgetApp_v3', JSON.stringify(budgetData));
+    localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData));
 }
+
+// --- VYKRESLOVÁNÍ OBRAZOVKY ---
 function updateUI() {
     document.getElementById('totalSavingsDisplay').innerText = formatMoney(Math.floor(budgetData.totalSavings));
     
@@ -191,18 +186,34 @@ function updateUI() {
     const walletVal = Math.floor(budgetData.wallet);
     limitDisplay.innerText = formatMoney(walletVal) + ' Kč';
     
-    limitDisplay.style.color = walletVal < 0 ? 'var(--danger)' : 'var(--primary)';
+    if (walletVal < 0) {
+        limitDisplay.style.color = 'var(--danger)';
+    } else {
+        limitDisplay.style.color = 'var(--primary)';
+    }
 
     const remainingTotal = budgetData.wallet + budgetData.monthPool;
     document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.floor(remainingTotal)) + ' Kč';
 
     const today = new Date();
-    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-    const daysLeft = daysInMonth - today.getDate() + 1;
+    let daysLeft = getDaysBetween(getDateString(today), budgetData.endDate) + 1;
+    if (daysLeft < 0) daysLeft = 0;
+    
     document.getElementById('daysLeftDisplay').innerText = daysLeft;
     
-    let nextDaysAvg = daysLeft > 0 ? remainingTotal / daysLeft : 0;
-    document.getElementById('nextDaysDisplay').innerText = '(cca ' + formatMoney(Math.floor(nextDaysAvg)) + ' Kč / den)';
+    let nextDaysAvg = 0;
+    if (daysLeft > 0) {
+        nextDaysAvg = remainingTotal / daysLeft;
+    }
+    
+    const nextDaysEl = document.getElementById('nextDaysDisplay');
+    nextDaysEl.innerText = formatMoney(Math.floor(nextDaysAvg)) + ' Kč';
+    
+    if (nextDaysAvg <= 0) {
+        nextDaysEl.style.color = 'var(--danger)';
+    } else {
+        nextDaysEl.style.color = 'var(--primary)';
+    }
 
     renderExpenseList();
 }
@@ -245,22 +256,32 @@ function formatMoney(num) {
 
 function saveIncome() {
     const val = parseFloat(document.getElementById('incomeInput').value);
-    if (val > 0) {
-        budgetData.income = val;
-        
-        const today = new Date();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const daysLeft = daysInMonth - today.getDate() + 1;
-        
-        const allowance = val / daysLeft;
-        budgetData.wallet = allowance;
-        budgetData.monthPool = val - allowance;
-        budgetData.lastProcessedDate = getDateString(today);
-        
-        document.getElementById('incomeModal').style.display = 'none';
-        saveData();
-        updateUI();
+    const sDate = document.getElementById('startDateInput').value;
+    const eDate = document.getElementById('endDateInput').value;
+    
+    if (!val || val <= 0 || !sDate || !eDate) {
+        alert('Vyplň všechny údaje (příjem i data).');
+        return;
     }
+    if (sDate > eDate) {
+        alert('Konec období musí být stejný nebo pozdější než začátek.');
+        return;
+    }
+
+    budgetData.income = val;
+    budgetData.startDate = sDate;
+    budgetData.endDate = eDate;
+    budgetData.wallet = 0;
+    budgetData.monthPool = val;
+    
+    // Nastavíme lastProcessedDate na den před začátkem, aby procesor správně naskočil
+    let startD = new Date(sDate);
+    startD.setDate(startD.getDate() - 1);
+    budgetData.lastProcessedDate = getDateString(startD);
+    
+    document.getElementById('incomeModal').style.display = 'none';
+    saveData();
+    processDailyAllowance();
 }
 
 function addQuickExpense(description, manualAmount = null, manualDate = null) {
@@ -382,7 +403,7 @@ function addDirectToSavings() {
 
     if (amount && amount > 0) {
         if (amount > totalRemaining) {
-            alert('Tolik peněz ve svém aktuálním rozpočtu na tento měsíc nemáš.');
+            alert('Tolik peněz ve svém aktuálním rozpočtu nemáš.');
             return;
         }
         
@@ -398,8 +419,7 @@ function addDirectToSavings() {
 
         const totalRemainingAfter = budgetData.wallet + budgetData.monthPool;
         const today = new Date();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const daysLeft = daysInMonth - today.getDate() + 1;
+        const daysLeft = getDaysBetween(getDateString(today), budgetData.endDate) + 1;
         
         if (daysLeft > 0) {
             budgetData.wallet = totalRemainingAfter / daysLeft;
@@ -423,12 +443,11 @@ function withdrawDirectFromSavings() {
         }
         
         budgetData.totalSavings -= amount;
-        budgetData.monthPool += amount;
+        budgetData.monthPool += amount; 
         
         const totalRemainingAfter = budgetData.wallet + budgetData.monthPool;
         const today = new Date();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const daysLeft = daysInMonth - today.getDate() + 1;
+        const daysLeft = getDaysBetween(getDateString(today), budgetData.endDate) + 1;
         
         if (daysLeft > 0) {
             budgetData.wallet = totalRemainingAfter / daysLeft;
@@ -444,6 +463,7 @@ function withdrawDirectFromSavings() {
 
 function openSettingsModal() {
     document.getElementById('editIncomeInput').value = budgetData.income;
+    document.getElementById('editEndDateInput').value = budgetData.endDate;
     document.getElementById('settingsModal').style.display = 'flex';
 }
 
@@ -451,24 +471,34 @@ function closeSettingsModal() {
     document.getElementById('settingsModal').style.display = 'none';
 }
 
-function saveEditedIncome() {
+// ZMĚNA: Ukládá nově i úpravu koncového data v rámci aktuálního období
+function saveEditedSettings() {
     const newIncome = parseFloat(document.getElementById('editIncomeInput').value);
-    if (newIncome && newIncome > 0) {
+    const newEndDate = document.getElementById('editEndDateInput').value;
+    
+    if (newIncome && newIncome > 0 && newEndDate) {
+        
+        if (newEndDate < getDateString(new Date())) {
+            alert('Nové datum konce nemůže být v minulosti.');
+            return;
+        }
+
         const difference = newIncome - budgetData.income;
         budgetData.income = newIncome;
         budgetData.monthPool += difference; 
         
+        budgetData.endDate = newEndDate;
+        
         saveData();
-        updateUI();
-        alert('Měsíční rozpočet byl úspěšně upraven.');
+        forceRecalculate(); 
+        alert('Nastavení úspěšně uloženo a rozpočet přepočítán na nový počet dnů.');
     }
 }
 
 function forceRecalculate() {
     const totalRemaining = budgetData.wallet + budgetData.monthPool;
     const today = new Date();
-    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-    const daysLeft = daysInMonth - today.getDate() + 1;
+    const daysLeft = getDaysBetween(getDateString(today), budgetData.endDate) + 1;
     
     if (daysLeft > 0) {
         budgetData.wallet = totalRemaining / daysLeft;
@@ -477,7 +507,6 @@ function forceRecalculate() {
         
         saveData();
         updateUI();
-        alert('Rozpočet byl srovnán a spravedlivě rozpočítán na všechny zbývající dny.');
     }
     closeSettingsModal();
 }
@@ -489,6 +518,7 @@ function hardResetApp() {
         localStorage.removeItem('myBudgetApp');
         localStorage.removeItem('myBudgetApp_v2');
         localStorage.removeItem('myBudgetApp_v3');
+        localStorage.removeItem('myBudgetApp_v4');
         location.reload();
     } else if (overeni !== null) {
         alert("Zadán špatný text. Bezpečnostní pojistka smazání zrušila. Tvá data jsou v bezpečí.");
