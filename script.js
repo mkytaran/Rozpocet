@@ -45,7 +45,8 @@ function getDaysBetween(d1Str, d2Str) {
     const d2 = new Date(d2Str);
     d1.setHours(0,0,0,0);
     d2.setHours(0,0,0,0);
-    return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+    // Přidali jsme Math.round() aby z toho nevypadlo desetinné číslo!
+    return Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 let budgetData = JSON.parse(localStorage.getItem('myBudgetApp_v4'));
@@ -189,21 +190,24 @@ function saveData() {
 // --- VYKRESLOVÁNÍ OBRAZOVKY ---
 function updateUI() {
     document.getElementById('totalSavingsDisplay').innerText = formatMoney(Math.floor(budgetData.totalSavings));
+    
     const limitDisplay = document.getElementById('dailyLimitDisplay');
-    const walletVal = Math.floor(budgetData.wallet);
+    // Místo uříznutí na nulu (Math.floor), teď normálně matematicky zaokrouhlujeme
+    const walletVal = Math.round(budgetData.wallet); 
     limitDisplay.innerText = formatMoney(walletVal) + ' Kč';
     limitDisplay.style.color = walletVal < 0 ? 'var(--danger)' : 'var(--primary)';
 
     const remainingTotal = budgetData.wallet + budgetData.monthPool;
-    document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.floor(remainingTotal)) + ' Kč';
+    document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.round(remainingTotal)) + ' Kč';
 
     const today = new Date();
     let daysLeft = Math.max(0, getDaysBetween(getDateString(today), budgetData.endDate) + 1);
     document.getElementById('daysLeftDisplay').innerText = daysLeft;
     
+    // Zde byla ta nula!
     let nextDaysAvg = daysLeft > 0 ? (remainingTotal / daysLeft) : 0;
     const nextDaysEl = document.getElementById('nextDaysDisplay');
-    nextDaysEl.innerText = formatMoney(Math.floor(nextDaysAvg)) + ' Kč';
+    nextDaysEl.innerText = formatMoney(Math.round(nextDaysAvg)) + ' Kč';
     nextDaysEl.style.color = nextDaysAvg <= 0 ? 'var(--danger)' : 'var(--primary)';
 
     renderExpenseList();
@@ -234,7 +238,8 @@ function renderExpenseList() {
 }
 
 function formatMoney(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    // Opravený regulární výraz pro formátování (z toho starého mohlo pramenit to podivné zobrazení u desetinných)
+    return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
 function saveIncome() {
