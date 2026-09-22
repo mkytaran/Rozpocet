@@ -80,11 +80,17 @@ function initApp() {
     const today = new Date();
     const todayStr = getDateString(today);
 
-    if (budgetData.endDate && todayStr > budgetData.endDate) {
-        budgetData.totalSavings += (Math.max(0, budgetData.wallet) + budgetData.monthPool);
-        budgetData.income = 0; budgetData.wallet = 0; budgetData.monthPool = 0;
-        budgetData.expenses = []; budgetData.startDate = ''; budgetData.endDate = ''; budgetData.lastProcessedDate = '';
-        saveData();
+    // BEZPEČNÉ POROVNÁNÍ DAT (místo textu porovnáme reálný čas)
+    if (budgetData.endDate) {
+        let endObj = new Date(budgetData.endDate);
+        endObj.setHours(23, 59, 59); // Nastavíme na úplný konec daného dne
+        
+        if (today > endObj) {
+            budgetData.totalSavings += (Math.max(0, budgetData.wallet) + budgetData.monthPool);
+            budgetData.income = 0; budgetData.wallet = 0; budgetData.monthPool = 0;
+            budgetData.expenses = []; budgetData.startDate = ''; budgetData.endDate = ''; budgetData.lastProcessedDate = '';
+            saveData();
+        }
     }
 
     if (budgetData.income === 0 || !budgetData.endDate) {
@@ -385,12 +391,6 @@ function openSettingsModal() {
 function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
 
 function saveEditedSettings() {
-    const uid = document.getElementById('editUserId').value.trim();
-    const upin = document.getElementById('editUserPin').value.trim();
-    localStorage.setItem('budgetUserId', uid);
-    localStorage.setItem('budgetUserPin', upin);
-    USER_ID = uid; USER_PIN = upin;
-
     const newIncome = parseFloat(document.getElementById('editIncomeInput').value);
     const newEndDate = document.getElementById('editEndDateInput').value;
 
@@ -412,7 +412,85 @@ function saveEditedSettings() {
     }
     
     saveData(); updateUI(); closeSettingsModal();
-    alert('Nastavení uloženo. Zbývající peníze byly přepočítány na ' + daysLeft + ' dnů.');
+    alert('Rozpočet uloženo. Zbývající peníze byly přepočítány na ' + daysLeft + ' dnů.');
+}
+
+async function saveToCloud(event) {
+    if (!API_URL || API_URL.includes("SEM_VLOZ")) return alert("Chybí API URL z Google Apps Scriptu!");
+    
+    // Přímé uložení PINu bez nutnosti měnit rozpočet
+    const uid = document.getElementById('editUserId').value.trim();
+    const upin = document.getElementById('editUserPin').value.trim();
+    if (!uid || !upin) return alert("Nejprve vyplň Jméno a PIN do políček výše!");
+    
+    USER_ID = uid; USER_PIN = upin;
+    localStorage.setItem('budgetUserId', uid);
+    localStorage.setItem('budgetUserPin', upin);
+    
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "⏳ Ukládám..."; btn.disabled = true;
+
+    try {
+        budgetData.lastUpdated = Date.now();
+        localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData)); 
+        const response = await fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ userId: USER_ID, pin: USER_PIN, action: 'save', data: budgetData })
+        });
+        const result = await response.json();
+        if (result.status === 'success') btn.innerText = "✅ Uloženo";
+        else throw new Error(result.error);
+    } catch (e) {
+        alert("Chyba při ukládání: " + e.message); btn.innerText = "❌ Chyba";
+    }
+    setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+}
+
+async function loadFromCloud(event) {
+    if (!API_URL || API_URL.includes("SEM_VLOZ")) return alert("Chybí API URL!");
+    
+    // Na novém PC stačí jen vyplnit políčka a kliknout sem. Přečtou a uloží se sama!
+    const uid = document.getElementById('editUserId').value.trim();
+    const upin = document.getElementById('editUserPin').value.trim();
+    if (!uid || !upin) return alert("Nejprve vyplň Jméno a PIN pro obnovu ze zálohy!");
+    
+    USER_ID = uid; USER_PIN = upin;
+    localStorage.setItem('budgetUserId', uid);
+    localStorage.setItem('budgetUserPin', upin);
+    
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "⏳ Načítám..."; btn.disabled = true;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ userId: USER_ID, pin: USER_PIN, action: 'load' })
+        });
+        const result = await response.json();
+        if (result.status === 'success' && result.data) {
+            // Varování zjednodušeno pro čistý start na novém PC
+            if (budgetData.lastUpdated && budgetData.income > 0 && result.data.lastUpdated < budgetData.lastUpdated) {
+                if(!confirm("⚠️ Pozor: V tomto zařízení máš rozpracovaný rozpočet. Chceš ho opravdu přepsat daty z cloudu?")) {
+                    btn.innerText = originalText; btn.disabled = false; return;
+                }
+            }
+            budgetData = result.data;
+            localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData));
+            updateUI();
+            btn.innerText = "✅ Načteno";
+            setTimeout(() => { btn.innerText = originalText; btn.disabled = false; closeSettingsModal(); location.reload(); }, 1000);
+            return;
+        } else if (result.status === 'empty') {
+            alert("V cloudu zatím nejsou žádná data pro tohoto uživatele.");
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (e) {
+        alert("Chyba při stahování: " + e.message); btn.innerText = "❌ Chyba";
+    }
+    setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
 }
 
 // --- CLOUD TLAČÍTKA A FORCE UPDATE ---
@@ -485,6 +563,25 @@ function forceUpdateApp(event) {
     window.location.href = window.location.pathname + '?v=' + Date.now();
 }
 
+function logoutApp() {
+    // Pro jistotu se uživatele zeptáme, aby nepřišel o neuložená data
+    if (confirm("Opravdu se chceš odhlásit?\n\nZ bezpečnostních důvodů budou data rozpočtu z tohoto zařízení odstraněna (v cloudu samozřejmě zůstanou).\n\nUjisti se, že máš nejnovější změny zazálohované!")) {
+        
+        // Vymažeme přihlašovací údaje i data z paměti telefonu/prohlížeče
+        localStorage.removeItem('budgetUserId');
+        localStorage.removeItem('budgetUserPin');
+        localStorage.removeItem('myBudgetApp_v4');
+        
+        // Vynulujeme proměnné
+        USER_ID = '';
+        USER_PIN = '';
+        budgetData = null;
+        
+        // Znovu načteme stránku, což automaticky vyvolá přihlašovací okno
+        location.reload();
+    }
+}
+
 function hardResetApp() {
     const overeni = prompt("⚠️ TOTO SMAŽE ÚPLNĚ VŠECHNA DATA V TELEFONU!\n\n(Záloha v cloudu zůstane nedotčená)\nNapiš do pole níže slovo:\nSMAZAT");
     if (overeni === "SMAZAT") {
@@ -495,4 +592,73 @@ function hardResetApp() {
     }
 }
 
-initApp();
+// --- STARTOVACÍ LOGIKA (LOGIN FIRST) ---
+
+// Zjistíme, jestli už je uživatel přihlášený z minula
+function checkLoginState() {
+    if (USER_ID && USER_PIN) {
+        // Pokud údaje má, rovnou spouštíme aplikaci
+        document.getElementById('loginModal').style.display = 'none';
+        initApp();
+    } else {
+        // Pokud nemá (nové PC/mobil), ukážeme přihlašovací okno
+        document.getElementById('loginModal').style.display = 'flex';
+    }
+}
+
+// Funkce volaná tlačítkem "Vstoupit" na přihlašovací obrazovce
+async function performLogin(event) {
+    if (!API_URL || API_URL.includes("SEM_VLOZ")) return alert("V kódu chybí API URL z Google Apps Scriptu!");
+    
+    const uid = document.getElementById('loginUserId').value.trim();
+    const upin = document.getElementById('loginUserPin').value.trim();
+    
+    if (!uid || !upin) return alert("Vyplň Jméno i PIN.");
+    
+    const btn = event.target;
+    btn.innerText = "⏳ Připojuji k serveru...";
+    btn.disabled = true;
+
+    try {
+        // Zkusíme stáhnout data z cloudu pro toto jméno a PIN
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ userId: uid, pin: upin, action: 'load' })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.data) {
+            // Úspěch: Uživatel existuje a má data. Uložíme a spustíme.
+            budgetData = result.data;
+            localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData));
+            
+        } else if (result.status === 'empty') {
+            // Úspěch: Uživatel vytvořen (nebo je prázdný), pokračujeme s čistým štítem
+            // Nezapisujeme přes stará data nic, initApp si vyžádá Nový rozpočet
+            
+        } else {
+            // Chyba: Typicky špatný PIN
+            throw new Error(result.error);
+        }
+
+        // Pokud jsme došli sem, heslo bylo správné (nebo účet vznikl).
+        // Bezpečně uložíme přihlašovací údaje do telefonu
+        USER_ID = uid;
+        USER_PIN = upin;
+        localStorage.setItem('budgetUserId', uid);
+        localStorage.setItem('budgetUserPin', upin);
+        
+        document.getElementById('loginModal').style.display = 'none';
+        initApp(); // Spustíme aplikaci
+
+    } catch (e) {
+        alert("Chyba přihlášení: " + e.message);
+        btn.innerText = "Vstoupit / Vytvořit účet";
+        btn.disabled = false;
+    }
+}
+
+// Odstartování kontroly místo původního natvrdého spuštění
+checkLoginState();

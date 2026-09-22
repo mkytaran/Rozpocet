@@ -21,6 +21,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Modál: Úvodní Přihlášení / Registrace -->
+    <div class="modal-overlay" id="loginModal" style="background-color: var(--bg-color); z-index: 9999;">
+        <div class="modal-content" style="box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <h1 style="font-size: 2rem; margin-bottom: 5px;">💰 Rozpočet</h1>
+            <p style="color: var(--text-muted); margin-bottom: 25px;">Přihlas se, nebo si vytvoř nový účet.</p>
+            
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label style="font-size: 0.85rem; color: var(--text-muted); font-weight: bold;">Tvé Jméno (ID):</label>
+                <input type="text" id="loginUserId" placeholder="např. michal">
+            </div>
+            <div style="text-align: left; margin-bottom: 25px;">
+                <label style="font-size: 0.85rem; color: var(--text-muted); font-weight: bold;">Tajný PIN:</label>
+                <input type="password" id="loginUserPin" placeholder="****" inputmode="numeric">
+            </div>
+            
+            <button class="btn" style="background-color: var(--primary); color: white; font-size: 1.1rem; padding: 15px;" onclick="performLogin(event)">Vstoupit / Vytvořit účet</button>
+        </div>
+    </div>
 
     <div class="top-bar">
         <h2 style="margin:0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
@@ -109,7 +127,8 @@
 
             <!-- SEKCE CLOUD ZABEZPEČENÍ -->
             <hr style="border: 0; height: 1px; background-color: var(--border-color); margin: 20px 0;">
-            <h3 style="font-size: 1rem; margin-bottom: 15px;">☁️ Cloud Zabezpečení</h3>
+            <h3 style="font-size: 1rem; margin-bottom: 5px;">☁️ Cloud Zabezpečení</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Na novém zařízení stačí vyplnit Jméno a PIN a rovnou kliknout na <strong>Obnovit</strong>.</p>
             <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                 <div style="flex: 1;">
                     <label style="font-size: 0.85rem; color: var(--text-muted);">Tvé Jméno (ID):</label>
@@ -126,8 +145,11 @@
             </div>
             <hr style="border: 0; height: 1px; background-color: var(--border-color); margin: 20px 0;">
 
-            <!-- BEZPEČNÝ RESTART A RESET -->
-            <button class="btn" style="background-color: var(--border-color); color: var(--text-color); margin-bottom: 25px;" onclick="forceUpdateApp(event)">🔄 Stáhnout aktualizaci aplikace</button>
+            <!-- BEZPEČNÝ RESTART, ODHLÁŠENÍ A RESET -->
+            <button class="btn" style="background-color: var(--border-color); color: var(--text-color); margin-bottom: 15px;" onclick="forceUpdateApp(event)">🔄 Stáhnout aktualizaci aplikace</button>
+            
+            <button class="btn" style="background-color: var(--border-color); color: var(--text-color); margin-bottom: 25px;" onclick="logoutApp()">🚪 Odhlásit se</button>
+            
             <button class="btn" style="background-color: var(--danger); color: white; margin-bottom: 25px;" onclick="hardResetApp()">⚠️ Vymazat data a začít znovu</button>
             
             <button class="btn" style="background-color: transparent; color: var(--text-muted); text-decoration: underline;" onclick="closeSettingsModal()">Zavřít</button>
