@@ -88,7 +88,7 @@
         </div>
     </div>
 
-    <!-- Modál: Nastavení (Pročištěné s jedním jasným tlačítkem) -->
+   <!-- Modál: Nastavení -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content">
             <h2>Nastavení</h2>
@@ -105,10 +105,31 @@
                 </div>
             </div>
             
-            <!-- VŠE SPOJENO DO TOHOTO JEDNOHO TLAČÍTKA -->
             <button class="btn" style="margin-bottom: 25px;" onclick="saveEditedSettings()">➗ Uložit a srovnat limity</button>
 
+            <!-- SEKCE CLOUD ZABEZPEČENÍ -->
+            <hr style="border: 0; height: 1px; background-color: var(--border-color); margin: 20px 0;">
+            <h3 style="font-size: 1rem; margin-bottom: 15px;">☁️ Cloud Zabezpečení</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Tvé Jméno (ID):</label>
+                    <input type="text" id="editUserId" placeholder="např. michal" style="margin-bottom: 0;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Tajný PIN:</label>
+                    <input type="password" id="editUserPin" placeholder="****" inputmode="numeric" style="margin-bottom: 0;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+                <button class="btn" style="background-color: var(--primary); color: white;" onclick="saveToCloud(event)">Zálohovat</button>
+                <button class="btn" style="background-color: var(--border-color); color: var(--text-color);" onclick="loadFromCloud(event)">Obnovit</button>
+            </div>
+            <hr style="border: 0; height: 1px; background-color: var(--border-color); margin: 20px 0;">
+
+            <!-- BEZPEČNÝ RESTART A RESET -->
+            <button class="btn" style="background-color: var(--border-color); color: var(--text-color); margin-bottom: 25px;" onclick="forceUpdateApp(event)">🔄 Stáhnout aktualizaci aplikace</button>
             <button class="btn" style="background-color: var(--danger); color: white; margin-bottom: 25px;" onclick="hardResetApp()">⚠️ Vymazat data a začít znovu</button>
+            
             <button class="btn" style="background-color: transparent; color: var(--text-muted); text-decoration: underline;" onclick="closeSettingsModal()">Zavřít</button>
         </div>
     </div>

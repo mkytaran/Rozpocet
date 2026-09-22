@@ -1,3 +1,8 @@
+// --- KONFIGURACE BACKENDU ---
+const API_URL = "https://script.google.com/macros/s/AKfycbx9BAsEWP3exm4LeraEDgxbActd_-6pXlIUSpMH1mlqLjs3c_7IiXa37KOxMCMc3May/exec";
+let USER_ID = localStorage.getItem('budgetUserId') || '';
+let USER_PIN = localStorage.getItem('budgetUserPin') || '';
+
 // --- PŘEPÍNÁNÍ MOTIVU ---
 function initTheme() {
     const themeBtn = document.getElementById('themeToggleBtn');
@@ -30,7 +35,7 @@ function toggleTheme() {
 
 initTheme();
 
-// Pomocné funkce pro práci s datem
+// --- POMOCNÉ FUNKCE PRO DATUM ---
 function getDateString(d) {
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
@@ -56,19 +61,16 @@ if (!budgetData) {
         let firstDayStr = oldDataV3.monthId + '-01';
 
         budgetData = {
-            startDate: firstDayStr,
-            endDate: getDateString(lastDay),
-            income: oldDataV3.income,
-            wallet: oldDataV3.wallet,
-            monthPool: oldDataV3.monthPool,
+            startDate: firstDayStr, endDate: getDateString(lastDay),
+            income: oldDataV3.income, wallet: oldDataV3.wallet, monthPool: oldDataV3.monthPool,
             totalSavings: oldDataV3.totalSavings || 0,
             lastProcessedDate: oldDataV3.lastProcessedDate,
-            expenses: oldDataV3.expenses || []
+            expenses: oldDataV3.expenses || [], lastUpdated: Date.now()
         };
     } else {
         budgetData = {
             startDate: '', endDate: '', income: 0, wallet: 0, monthPool: 0,
-            totalSavings: 0, lastProcessedDate: '', expenses: []
+            totalSavings: 0, lastProcessedDate: '', expenses: [], lastUpdated: Date.now()
         };
     }
     localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData));
@@ -80,25 +82,18 @@ function initApp() {
 
     if (budgetData.endDate && todayStr > budgetData.endDate) {
         budgetData.totalSavings += (Math.max(0, budgetData.wallet) + budgetData.monthPool);
-        budgetData.income = 0;
-        budgetData.wallet = 0;
-        budgetData.monthPool = 0;
-        budgetData.expenses = [];
-        budgetData.startDate = '';
-        budgetData.endDate = '';
-        budgetData.lastProcessedDate = '';
+        budgetData.income = 0; budgetData.wallet = 0; budgetData.monthPool = 0;
+        budgetData.expenses = []; budgetData.startDate = ''; budgetData.endDate = ''; budgetData.lastProcessedDate = '';
         saveData();
     }
 
     if (budgetData.income === 0 || !budgetData.endDate) {
         document.getElementById('incomeModal').style.display = 'flex';
-        
         document.getElementById('startDateInput').value = todayStr;
         let nextMonth = new Date();
         nextMonth.setMonth(nextMonth.getMonth() + 1);
         nextMonth.setDate(nextMonth.getDate() - 1);
         document.getElementById('endDateInput').value = getDateString(nextMonth);
-        
         document.getElementById('incomeInput').focus();
         return;
     } 
@@ -118,7 +113,6 @@ function initApp() {
 
 function handleLeftover(action) {
     let leftover = budgetData.wallet;
-    
     if (action === 'rozpocitat') {
         budgetData.monthPool += leftover;
         budgetData.wallet = 0;
@@ -126,21 +120,17 @@ function handleLeftover(action) {
         budgetData.totalSavings += leftover;
         budgetData.wallet = 0;
     }
-    
     document.getElementById('dailyActionModal').style.display = 'none';
     processDailyAllowance();
 }
 
 function processDailyAllowance() {
     if (!budgetData.lastProcessedDate) return;
-
     let lastDate = new Date(budgetData.lastProcessedDate);
     let today = new Date();
     today.setHours(0,0,0,0);
-    
     let endDateObj = new Date(budgetData.endDate);
     endDateObj.setHours(0,0,0,0);
-
     let changed = false;
 
     if (lastDate < today && budgetData.wallet < 0) {
@@ -151,9 +141,7 @@ function processDailyAllowance() {
     
     while(lastDate < today) {
         lastDate.setDate(lastDate.getDate() + 1);
-        
         if (lastDate > endDateObj) break;
-
         let currentStr = getDateString(lastDate);
         let daysLeft = getDaysBetween(currentStr, budgetData.endDate) + 1;
 
@@ -170,45 +158,47 @@ function processDailyAllowance() {
     updateUI();
 }
 
-function saveData() {
-    localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData));
+// --- CLOUD A DATA LOGIKA ---
+let autoSyncTimeout;
+function autoSaveToCloudSilent() {
+    if (!API_URL || API_URL.includes("SEM_VLOZ") || !USER_ID || !USER_PIN) return;
+    clearTimeout(autoSyncTimeout);
+    autoSyncTimeout = setTimeout(async () => {
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ userId: USER_ID, pin: USER_PIN, action: 'save', data: budgetData })
+            });
+        } catch (e) { console.error("☁️ Auto-save selhal:", e); }
+    }, 3000); 
 }
 
+function saveData() {
+    budgetData.lastUpdated = Date.now();
+    localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData));
+    autoSaveToCloudSilent();
+}
+
+// --- VYKRESLOVÁNÍ OBRAZOVKY ---
 function updateUI() {
     document.getElementById('totalSavingsDisplay').innerText = formatMoney(Math.floor(budgetData.totalSavings));
-    
     const limitDisplay = document.getElementById('dailyLimitDisplay');
     const walletVal = Math.floor(budgetData.wallet);
     limitDisplay.innerText = formatMoney(walletVal) + ' Kč';
-    
-    if (walletVal < 0) {
-        limitDisplay.style.color = 'var(--danger)';
-    } else {
-        limitDisplay.style.color = 'var(--primary)';
-    }
+    limitDisplay.style.color = walletVal < 0 ? 'var(--danger)' : 'var(--primary)';
 
     const remainingTotal = budgetData.wallet + budgetData.monthPool;
     document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.floor(remainingTotal)) + ' Kč';
 
     const today = new Date();
-    let daysLeft = getDaysBetween(getDateString(today), budgetData.endDate) + 1;
-    if (daysLeft < 0) daysLeft = 0;
-    
+    let daysLeft = Math.max(0, getDaysBetween(getDateString(today), budgetData.endDate) + 1);
     document.getElementById('daysLeftDisplay').innerText = daysLeft;
     
-    let nextDaysAvg = 0;
-    if (daysLeft > 0) {
-        nextDaysAvg = remainingTotal / daysLeft;
-    }
-    
+    let nextDaysAvg = daysLeft > 0 ? (remainingTotal / daysLeft) : 0;
     const nextDaysEl = document.getElementById('nextDaysDisplay');
     nextDaysEl.innerText = formatMoney(Math.floor(nextDaysAvg)) + ' Kč';
-    
-    if (nextDaysAvg <= 0) {
-        nextDaysEl.style.color = 'var(--danger)';
-    } else {
-        nextDaysEl.style.color = 'var(--primary)';
-    }
+    nextDaysEl.style.color = nextDaysAvg <= 0 ? 'var(--danger)' : 'var(--primary)';
 
     renderExpenseList();
 }
@@ -223,23 +213,15 @@ function renderExpenseList() {
     }
 
     const sorted = [...budgetData.expenses].sort((a, b) => b.id - a.id);
-
     sorted.forEach(item => {
         const li = document.createElement('li');
         li.className = 'expense-item';
-        
         const dateObj = new Date(item.date);
         const dateStr = `${dateObj.getDate()}.${dateObj.getMonth() + 1}.`;
 
         li.innerHTML = `
-            <div class="expense-info">
-                <strong>${item.desc}</strong>
-                <small>${dateStr}</small>
-            </div>
-            <div class="expense-amount">
-                -${formatMoney(item.amount)} Kč
-                <button class="delete-btn" onclick="deleteExpense(${item.id})">&times;</button>
-            </div>
+            <div class="expense-info"><strong>${item.desc}</strong><small>${dateStr}</small></div>
+            <div class="expense-amount">-${formatMoney(item.amount)} Kč<button class="delete-btn" onclick="deleteExpense(${item.id})">&times;</button></div>
         `;
         listEl.appendChild(li);
     });
@@ -254,20 +236,11 @@ function saveIncome() {
     const sDate = document.getElementById('startDateInput').value;
     const eDate = document.getElementById('endDateInput').value;
     
-    if (!val || val <= 0 || !sDate || !eDate) {
-        alert('Vyplň všechny údaje (příjem i data).');
-        return;
-    }
-    if (sDate > eDate) {
-        alert('Konec období musí být stejný nebo pozdější než začátek.');
-        return;
-    }
+    if (!val || val <= 0 || !sDate || !eDate) return alert('Vyplň všechny údaje.');
+    if (sDate > eDate) return alert('Konec období musí být stejný nebo pozdější než začátek.');
 
-    budgetData.income = val;
-    budgetData.startDate = sDate;
-    budgetData.endDate = eDate;
-    budgetData.wallet = 0;
-    budgetData.monthPool = val;
+    budgetData.income = val; budgetData.startDate = sDate; budgetData.endDate = eDate;
+    budgetData.wallet = 0; budgetData.monthPool = val;
     
     let startD = new Date(sDate);
     startD.setDate(startD.getDate() - 1);
@@ -288,15 +261,8 @@ function addQuickExpense(description, manualAmount = null, manualDate = null) {
         return;
     }
 
-    budgetData.expenses.push({
-        id: Date.now(),
-        desc: description,
-        amount: amount,
-        date: manualDate || new Date().toISOString()
-    });
-
+    budgetData.expenses.push({ id: Date.now(), desc: description, amount: amount, date: manualDate || new Date().toISOString() });
     budgetData.wallet -= amount;
-
     amountInput.value = '';
     saveData();
     updateUI();
@@ -316,69 +282,42 @@ function deleteExpense(id) {
 
 function openCustomModal(presetDesc = '') {
     const amount = document.getElementById('quickAmount').value;
-    if(!amount) {
-        alert("Nejdřív napiš částku nahoře!");
-        return;
-    }
-    
+    if(!amount) return alert("Nejdřív napiš částku nahoře!");
     document.getElementById('customDate').value = getDateString(new Date());
     document.getElementById('customDesc').value = presetDesc;
-    
     document.getElementById('customModal').style.display = 'flex';
-    
-    if (presetDesc) {
-        document.getElementById('customDate').focus();
-    } else {
-        document.getElementById('customDesc').focus();
-    }
+    if (presetDesc) document.getElementById('customDate').focus();
+    else document.getElementById('customDesc').focus();
 }
 
-function closeCustomModal() {
-    document.getElementById('customModal').style.display = 'none';
-}
+function closeCustomModal() { document.getElementById('customModal').style.display = 'none'; }
 
 function saveCustomExpense() {
     const amount = parseFloat(document.getElementById('quickAmount').value);
     const desc = document.getElementById('customDesc').value.trim() || 'Různé';
-    const dateVal = document.getElementById('customDate').value || new Date().toISOString();
-
-    addQuickExpense(desc, amount, dateVal);
+    addQuickExpense(desc, amount, document.getElementById('customDate').value || new Date().toISOString());
     closeCustomModal();
 }
 
 function openManageModal() {
     const currentWallet = Math.floor(budgetData.wallet);
-    if (currentWallet <= 0) {
-        alert("Dnes už v limitu nezbývají žádné peníze ke správě.");
-        return;
-    }
+    if (currentWallet <= 0) return alert("Dnes už v limitu nezbývají žádné peníze ke správě.");
     document.getElementById('manageInput').value = currentWallet;
     document.getElementById('manageModal').style.display = 'flex';
 }
 
-function closeManageModal() {
-    document.getElementById('manageModal').style.display = 'none';
-}
+function closeManageModal() { document.getElementById('manageModal').style.display = 'none'; }
 
 function executeManage(actionType) {
     const val = parseFloat(document.getElementById('manageInput').value);
-    
-    if (!val || val <= 0 || val > budgetData.wallet) {
-        alert("Zadej platnou částku do výše tvého dnešního limitu.");
-        return;
-    }
+    if (!val || val <= 0 || val > budgetData.wallet) return alert("Zadej platnou částku do výše tvého dnešního limitu.");
 
     if (actionType === 'rozpocitat') {
-        budgetData.monthPool += val;
-        budgetData.wallet -= val;
+        budgetData.monthPool += val; budgetData.wallet -= val;
     } else if (actionType === 'usporit') {
-        budgetData.totalSavings += val;
-        budgetData.wallet -= val;
+        budgetData.totalSavings += val; budgetData.wallet -= val;
     }
-    
-    saveData();
-    updateUI();
-    closeManageModal();
+    saveData(); updateUI(); closeManageModal();
 }
 
 function openSavingsModal() {
@@ -386,138 +325,173 @@ function openSavingsModal() {
     document.getElementById('savingsManageInput').value = '';
     document.getElementById('savingsModal').style.display = 'flex';
 }
-
-function closeSavingsModal() {
-    document.getElementById('savingsModal').style.display = 'none';
-}
+function closeSavingsModal() { document.getElementById('savingsModal').style.display = 'none'; }
 
 function addDirectToSavings() {
     const amount = parseFloat(document.getElementById('savingsManageInput').value);
     const totalRemaining = budgetData.wallet + budgetData.monthPool;
 
     if (amount && amount > 0) {
-        if (amount > totalRemaining) {
-            alert('Tolik peněz ve svém aktuálním rozpočtu nemáš.');
-            return;
-        }
+        if (amount > totalRemaining) return alert('Tolik peněz ve svém aktuálním rozpočtu nemáš.');
         
         budgetData.totalSavings += amount;
-
         if (amount <= budgetData.monthPool) {
             budgetData.monthPool -= amount;
         } else {
             const remainder = amount - budgetData.monthPool;
-            budgetData.monthPool = 0;
-            budgetData.wallet -= remainder;
+            budgetData.monthPool = 0; budgetData.wallet -= remainder;
         }
 
         const totalRemainingAfter = budgetData.wallet + budgetData.monthPool;
-        const today = new Date();
-        const daysLeft = getDaysBetween(getDateString(today), budgetData.endDate) + 1;
+        const daysLeft = getDaysBetween(getDateString(new Date()), budgetData.endDate) + 1;
         
         if (daysLeft > 0) {
             budgetData.wallet = totalRemainingAfter / daysLeft;
             budgetData.monthPool = totalRemainingAfter - budgetData.wallet;
-            budgetData.lastProcessedDate = getDateString(today);
+            budgetData.lastProcessedDate = getDateString(new Date());
         }
-
-        saveData();
-        updateUI();
-        closeSavingsModal();
+        saveData(); updateUI(); closeSavingsModal();
     }
 }
 
 function withdrawDirectFromSavings() {
     const amount = parseFloat(document.getElementById('savingsManageInput').value);
-
     if (amount && amount > 0) {
-        if (amount > budgetData.totalSavings) {
-            alert('Tolik peněz v úsporách nemáš.');
-            return;
-        }
+        if (amount > budgetData.totalSavings) return alert('Tolik peněz v úsporách nemáš.');
         
         budgetData.totalSavings -= amount;
         budgetData.monthPool += amount; 
         
         const totalRemainingAfter = budgetData.wallet + budgetData.monthPool;
-        const today = new Date();
-        const daysLeft = getDaysBetween(getDateString(today), budgetData.endDate) + 1;
+        const daysLeft = getDaysBetween(getDateString(new Date()), budgetData.endDate) + 1;
         
         if (daysLeft > 0) {
             budgetData.wallet = totalRemainingAfter / daysLeft;
             budgetData.monthPool = totalRemainingAfter - budgetData.wallet;
-            budgetData.lastProcessedDate = getDateString(today);
+            budgetData.lastProcessedDate = getDateString(new Date());
         }
-        
-        saveData();
-        updateUI();
-        closeSavingsModal();
+        saveData(); updateUI(); closeSavingsModal();
     }
 }
 
 function openSettingsModal() {
     document.getElementById('editIncomeInput').value = budgetData.income;
     document.getElementById('editEndDateInput').value = budgetData.endDate;
+    document.getElementById('editUserId').value = USER_ID;
+    document.getElementById('editUserPin').value = USER_PIN;
     document.getElementById('settingsModal').style.display = 'flex';
 }
 
-function closeSettingsModal() {
-    document.getElementById('settingsModal').style.display = 'none';
-}
+function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
 
-// ZMĚNA: Vše sjednoceno do jedné robustní funkce. Uloží a natvrdo přepočítá.
 function saveEditedSettings() {
-    const newIncomeInput = document.getElementById('editIncomeInput').value;
-    const newEndDateInput = document.getElementById('editEndDateInput').value;
-    
-    const newIncome = parseFloat(newIncomeInput);
-    const newEndDate = newEndDateInput;
+    const uid = document.getElementById('editUserId').value.trim();
+    const upin = document.getElementById('editUserPin').value.trim();
+    localStorage.setItem('budgetUserId', uid);
+    localStorage.setItem('budgetUserPin', upin);
+    USER_ID = uid; USER_PIN = upin;
 
-    if (!newIncome || newIncome <= 0 || !newEndDate) {
-        alert('Vyplň prosím správně příjem i datum konce.');
-        return;
-    }
+    const newIncome = parseFloat(document.getElementById('editIncomeInput').value);
+    const newEndDate = document.getElementById('editEndDateInput').value;
 
-    if (newEndDate < getDateString(new Date())) {
-        alert('Nové datum konce nemůže být v minulosti.');
-        return;
-    }
+    if (!newIncome || newIncome <= 0 || !newEndDate) return alert('Vyplň prosím správně příjem i datum konce.');
+    if (newEndDate < getDateString(new Date())) return alert('Nové datum konce nemůže být v minulosti.');
 
-    // Aplikace změn příjmu a data
     const difference = newIncome - budgetData.income;
     budgetData.income = newIncome;
     budgetData.monthPool += difference; 
     budgetData.endDate = newEndDate;
     
-    // Okamžitý matematický přepočet podle nových dnů
     const totalRemaining = budgetData.wallet + budgetData.monthPool;
-    const today = new Date();
-    const daysLeft = getDaysBetween(getDateString(today), budgetData.endDate) + 1;
+    const daysLeft = getDaysBetween(getDateString(new Date()), budgetData.endDate) + 1;
     
     if (daysLeft > 0) {
         budgetData.wallet = totalRemaining / daysLeft;
         budgetData.monthPool = totalRemaining - budgetData.wallet;
-        budgetData.lastProcessedDate = getDateString(today);
+        budgetData.lastProcessedDate = getDateString(new Date());
     }
     
-    saveData();
-    updateUI();
-    closeSettingsModal();
-    
+    saveData(); updateUI(); closeSettingsModal();
     alert('Nastavení uloženo. Zbývající peníze byly přepočítány na ' + daysLeft + ' dnů.');
 }
 
-function hardResetApp() {
-    const overeni = prompt("⚠️ TOTO SMAŽE ÚPLNĚ VŠECHNA DATA!\n\nPokud opravdu chceš aplikaci vyresetovat a přijít o historii, napiš do pole níže slovo:\nSMAZAT");
+// --- CLOUD TLAČÍTKA A FORCE UPDATE ---
+async function saveToCloud(event) {
+    if (!API_URL || API_URL.includes("SEM_VLOZ")) return alert("Chybí API URL z Google Apps Scriptu!");
+    if (!USER_ID || !USER_PIN) return alert("Nejprve vyplň Jméno a PIN, a klikni na 'Uložit a srovnat limity'!");
     
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "⏳ Ukládám..."; btn.disabled = true;
+
+    try {
+        budgetData.lastUpdated = Date.now();
+        localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData)); 
+        const response = await fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ userId: USER_ID, pin: USER_PIN, action: 'save', data: budgetData })
+        });
+        const result = await response.json();
+        if (result.status === 'success') btn.innerText = "✅ Uloženo";
+        else throw new Error(result.error);
+    } catch (e) {
+        alert("Chyba při ukládání: " + e.message); btn.innerText = "❌ Chyba";
+    }
+    setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+}
+
+async function loadFromCloud(event) {
+    if (!API_URL || API_URL.includes("SEM_VLOZ")) return alert("Chybí API URL!");
+    if (!USER_ID || !USER_PIN) return alert("Nejprve vyplň Jméno a PIN, a klikni na 'Uložit a srovnat limity'!");
+    
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "⏳ Načítám..."; btn.disabled = true;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ userId: USER_ID, pin: USER_PIN, action: 'load' })
+        });
+        const result = await response.json();
+        if (result.status === 'success' && result.data) {
+            if (budgetData.lastUpdated && result.data.lastUpdated < budgetData.lastUpdated) {
+                if(!confirm("⚠️ Lokální data v telefonu jsou novější než v cloudu. Opravdu je chceš přepsat?")) {
+                    btn.innerText = originalText; btn.disabled = false; return;
+                }
+            }
+            budgetData = result.data;
+            localStorage.setItem('myBudgetApp_v4', JSON.stringify(budgetData));
+            updateUI();
+            btn.innerText = "✅ Načteno";
+            setTimeout(() => { btn.innerText = originalText; btn.disabled = false; closeSettingsModal(); }, 1000);
+            return;
+        } else if (result.status === 'empty') {
+            alert("V cloudu zatím nejsou žádná data pro tohoto uživatele.");
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (e) {
+        alert("Chyba při stahování: " + e.message); btn.innerText = "❌ Chyba";
+    }
+    setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+}
+
+function forceUpdateApp(event) {
+    if (event) {
+        event.target.innerText = "⏳ Stahuji novou verzi...";
+        event.target.disabled = true;
+    }
+    window.location.href = window.location.pathname + '?v=' + Date.now();
+}
+
+function hardResetApp() {
+    const overeni = prompt("⚠️ TOTO SMAŽE ÚPLNĚ VŠECHNA DATA V TELEFONU!\n\n(Záloha v cloudu zůstane nedotčená)\nNapiš do pole níže slovo:\nSMAZAT");
     if (overeni === "SMAZAT") {
-        localStorage.removeItem('myBudgetApp');
-        localStorage.removeItem('myBudgetApp_v2');
-        localStorage.removeItem('myBudgetApp_v3');
-        localStorage.removeItem('myBudgetApp_v4');
+        localStorage.clear();
         location.reload();
     } else if (overeni !== null) {
-        alert("Zadán špatný text. Bezpečnostní pojistka smazání zrušila. Tvá data jsou v bezpečí.");
+        alert("Zadán špatný text. Bezpečnostní pojistka smazání zrušila.");
     }
 }
 
