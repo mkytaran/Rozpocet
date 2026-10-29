@@ -62,6 +62,18 @@ body {
     transition: background-color 0.25s, color 0.25s;
 }
 
+body::after {
+    position: fixed;
+    z-index: 999;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: env(safe-area-inset-bottom, 0px);
+    background-color: var(--bg-color);
+    content: "";
+    pointer-events: none;
+}
+
 button, input { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, input:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 55%, transparent); outline-offset: 2px; }
