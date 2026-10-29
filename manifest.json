@@ -5,8 +5,8 @@
   "display": "standalone",
   "start_url": "/Rozpocet/",
   "scope": "/Rozpocet/",
-  "background_color": "#f2f5ef",
-  "theme_color": "#157654",
+  "background_color": "#15251e",
+  "theme_color": "#15251e",
   "icons": [
     {
       "src": "icon.svg",

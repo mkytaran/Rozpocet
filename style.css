@@ -71,7 +71,7 @@ body::after {
     bottom: 0;
     left: 0;
     height: env(safe-area-inset-bottom, 0px);
-    background-color: var(--bg-color);
+    background-color: #15251e;
     content: "";
     pointer-events: none;
 }
