@@ -195,7 +195,7 @@ function updateUI() {
     // Místo uříznutí na nulu (Math.floor), teď normálně matematicky zaokrouhlujeme
     const walletVal = Math.round(budgetData.wallet); 
     limitDisplay.innerText = formatMoney(walletVal) + ' Kč';
-    limitDisplay.style.color = walletVal < 0 ? 'var(--danger)' : 'var(--primary)';
+    limitDisplay.classList.toggle('is-negative', walletVal < 0);
 
     const remainingTotal = budgetData.wallet + budgetData.monthPool;
     document.getElementById('remainingMonthDisplay').innerText = formatMoney(Math.round(remainingTotal)) + ' Kč';
@@ -208,7 +208,7 @@ function updateUI() {
     let nextDaysAvg = daysLeft > 0 ? (remainingTotal / daysLeft) : 0;
     const nextDaysEl = document.getElementById('nextDaysDisplay');
     nextDaysEl.innerText = formatMoney(Math.round(nextDaysAvg)) + ' Kč';
-    nextDaysEl.style.color = nextDaysAvg <= 0 ? 'var(--danger)' : 'var(--primary)';
+    nextDaysEl.classList.toggle('is-negative', nextDaysAvg <= 0);
 
     renderExpenseList();
 }
@@ -611,6 +611,14 @@ function checkLoginState() {
     }
 }
 
+function registerServiceWorker() {
+    if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
+
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
+        console.warn('Registrace service workeru selhala:', error);
+    });
+}
+
 // Funkce volaná tlačítkem "Vstoupit" na přihlašovací obrazovce
 async function performLogin(event) {
     if (!API_URL || API_URL.includes("SEM_VLOZ")) return alert("V kódu chybí API URL z Google Apps Scriptu!");
@@ -667,3 +675,4 @@ async function performLogin(event) {
 
 // Odstartování kontroly místo původního natvrdého spuštění
 checkLoginState();
+registerServiceWorker();

@@ -1,10 +1,11 @@
 {
   "name": "Rozpočet",
   "short_name": "Rozpočet",
+  "id": "./index.html",
   "display": "standalone",
   "start_url": "./index.html",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#f2f5ef",
+  "theme_color": "#157654",
   "icons": [
     {
       "src": "icon.svg",
