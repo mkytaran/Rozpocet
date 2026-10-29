@@ -4,6 +4,11 @@ let USER_ID = localStorage.getItem('budgetUserId') || '';
 let USER_PIN = localStorage.getItem('budgetUserPin') || '';
 
 // --- PŘEPÍNÁNÍ MOTIVU ---
+function syncThemeColor(theme) {
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) themeColor.content = theme === 'dark' ? '#15251e' : '#f2f5ef';
+}
+
 function initTheme() {
     const themeBtn = document.getElementById('themeToggleBtn');
     const savedTheme = localStorage.getItem('budgetTheme');
@@ -16,6 +21,7 @@ function initTheme() {
         document.documentElement.setAttribute('data-theme', 'light');
         if (themeBtn) themeBtn.textContent = '🌙';
     }
+    syncThemeColor(document.documentElement.getAttribute('data-theme'));
 }
 
 function toggleTheme() {
@@ -31,6 +37,7 @@ function toggleTheme() {
         localStorage.setItem('budgetTheme', 'dark');
         themeBtn.textContent = '☀️';
     }
+    syncThemeColor(root.getAttribute('data-theme'));
 }
 
 initTheme();

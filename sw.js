@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rozpocet-app-v1';
+const CACHE_NAME = 'rozpocet-app-v2';
 const APP_SHELL = ['index.html', 'style.css', 'script.js', 'manifest.json', 'icon.svg'];
 
 function cacheKey(request) {
